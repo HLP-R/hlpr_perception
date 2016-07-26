@@ -1,0 +1,8 @@
+<!-- Starts up everything needed to run the example listener/talker nodes. -->
+<launch>
+  <arg name="segmentation/viz" default="true" />
+
+  <node pkg="segmentation" type="pc_seg" name="pc_seg" output="screen" launch-prefix="gdb -ex run --args">
+    <param name="segmentation/viz" value="$(arg segmentation/viz)" />
+  </node>
+</launch>
