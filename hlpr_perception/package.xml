@@ -1,0 +1,20 @@
+<package>
+  <name>hlpr_perception</name>
+  <version>1.0.0</version>
+  <description>Metapackage for the ROS Packages for perception with HLP-R common platform (Stanley Vector)</description>
+
+  <author email="tesca.fitzgerald@gatech.edu">Tesca Fitzgerald</author>
+  <maintainer email="tesca.fitzgerald@gatech.edu">Tesca Fitzgerald</maintainer>
+  
+  <url type="website">https://github.com/HLP-R/hlpr_perception/wiki</url>
+  <url type="bugtracker">https://github.com/HLP-R/hlpr_perception/issues</url>
+  <url type="repository">https://github.com/HLP-R/hlpr_perception</url>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+    <metapackage />
+  </export>
+</package>
