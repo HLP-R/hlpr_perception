@@ -53,14 +53,15 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 
 add_library(ftex SHARED src/cluster_processing.cpp src/rotcalipers.cpp src/utils.cpp src/utils_pcl_ros.cpp)
 target_link_libraries(ftex ${PCL_LIBRARIES} ${ROS_LIBRARIES})
+add_dependencies(ftex feature_extraction_generate_messages_cpp)
 
 add_executable(ft_ex src/feature_extraction.cpp)
 #add_executable(listener src/listener.cpp src/nodes/listener_node.cpp)
 #target_link_libraries(pc_seg ${catkin_LIBRARIES} ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries(ft_ex ${PCL_LIBRARIES} ftex ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
+add_dependencies(ft_ex feature_extraction_generate_messages_cpp)
 
 #add_dependencies(pc_seg segmentation_gencfg segmentation_generate_messages_cpp)
-add_dependencies(ft_ex segmentation_generate_messages_cpp)
 
 
 #install(DIRECTORY include/${PROJECT_NAME}/
