@@ -85,6 +85,7 @@ before_install:
   # Specific to PCL
   - sudo apt-get install -y libeigen3-dev
   - sudo apt-get install -y libflann-dev
+  - sudo apt-get install -y libpcap0.8  
   - git clone https://github.com/PointCloudLibrary/pcl.git
   - cd pcl && mkdir build && cd build
   - cmake .. && make -j2 && sudo make -j2 install
