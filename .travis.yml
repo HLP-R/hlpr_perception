@@ -84,7 +84,10 @@ before_install:
   - sudo dpkg -i libglfw3*_3.0.4-1_*.deb && sudo apt-get install mesa-common-dev freeglut3-dev libxrandr-dev libxi-dev
   - cd .. && mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/freenect2 && make && make install
   - sudo ln -sf ~/freenect2/lib/cmake/freenect2/freenect2Config.cmake /usr/share/cmake-3.2/Modules/Findfreenect2.cmake
-
+  # Specific to PCL
+  - git clone https://github.com/PointCloudLibrary/pcl.git
+  - cd pcl && mkdir build && cd build
+  - cmake .. && make -j2 && sudo make -j2 install
 
 # Create a catkin workspace with the package under integration.
 install:
