@@ -5,13 +5,16 @@
   <arg name="segmentation/v" default="340" />
   <arg name="segmentation/src" default="0" />
 
-  <node pkg="segmentation" type="pc_seg" name="pc_seg" output="screen">
+  <node pkg="segmentation" type="pc_seg" name="pc_seg">
     <param name="segmentation/nv" value="$(arg segmentation/nv)" />
     <param name="segmentation/rt" value="$(arg segmentation/rt)" />
     <param name="segmentation/src" value="$(arg segmentation/src)" />
     <param name="segmentation/v" value="$(arg segmentation/v)" />
   </node>
-  <node pkg="feature_extraction" type="ft_ex" name="ft_ex">
+
+  <arg name="feature_extraction/nv" default="true" />
+  <node pkg="feature_extraction" type="ft_ex" name="ft_ex" output="screen">
+    <param name="feature_extraction/nv" value="$(arg feature_extraction/nv)" />
   </node>
   <node pkg="hlpr_object_labeling" type="object_labeling.py" name="hlpr_object_labeling">
   </node>

@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <cstdlib>
 #include <cstring>
+#include <ros/ros.h>
 
 namespace ridiculous_global_variables
 {
@@ -137,110 +138,114 @@ void fillInIndices(std::vector<int> &indices, int start, int end, bool push_back
 }
 
 int
-parseArguments(int argc, char **argv, parsedArguments &pA)
+parseArguments(int argc, char **argv, parsedArguments &pA, ros::NodeHandle &nh)
 {
   int unknownArgNum = 0;
   pA.viz = true;
-  for (int i = 1; i < argc; i++)
-  {
-      if (!strcmp(argv[i], "-v"))
+  float val = 0;
+  bool bVal = false;
+  int iVal = 1;
+  std::string sVal;
+ // for /int i = 1; i < argc; i++)
+ // {
+      if (nh.getParam("feature_extraction/v", val))
       {
-          pA.hue_val = atof(argv[++i]);
+          pA.hue_val = val;
       }
-      else if (!strcmp(argv[i], "-t"))
+      if (nh.getParam("feature_extraction/t", val))
       {
-          pA.hue_thresh = atof(argv[++i]);
+          pA.hue_thresh = val;
       }
-      else if (!strcmp(argv[i], "-z"))
+      if (nh.getParam("feature_extraction/z", val))
       {
-          pA.z_thresh = atof(argv[++i]);
+          pA.z_thresh = val;
       }
-      else if (!strcmp(argv[i], "-e"))
+      if (nh.getParam("feature_extraction/e", val))
       {
-          pA.euc_thresh = atof(argv[++i]);
+          pA.euc_thresh = val;
       }
-      else if (!strcmp(argv[i], "-p"))
+      if (nh.getParam("feature_extraction/p", bVal))
       {
-          pA.pre_proc = atoi(argv[++i]);
+          pA.pre_proc = bVal;
       }
-      else if (!strcmp(argv[i], "-c"))
+      if (nh.getParam("feature_extraction/c", iVal))
       {
-          pA.seg_color_ind = atoi(argv[++i]);
+          pA.seg_color_ind = iVal;
       }
-      else if (!strcmp(argv[i], "-m"))
+      if (nh.getParam("feature_extraction/m", bVal))
       {
-          pA.merge_clusters = atoi(argv[++i]);
+          pA.merge_clusters = bVal;
       }
-      else if (!strcmp(argv[i], "-dt"))
+      if (nh.getParam("feature_extraction/dt", val))
       {
-          pA.ecc_dist_thresh = atof(argv[++i]);
+          pA.ecc_dist_thresh = val;
       }
-      else if (!strcmp(argv[i], "-ct"))
+      if (nh.getParam("feature_extraction/ct", val))
       {
-          pA.ecc_color_thresh = atof(argv[++i]);
+          pA.ecc_color_thresh = val;
       }
-      else if (!strcmp(argv[i], "-src"))
+      if (nh.getParam("feature_extraction/src", iVal))
       {
-    	  pA.pc_source = atoi(argv[++i]);
+    	  pA.pc_source = iVal;
       }
-      else if (!strcmp(argv[i], "-out"))
+      if (nh.getParam("feature_extraction/out", iVal))
       {
-          pA.output_type = atoi(argv[++i]);
+          pA.output_type = iVal;
       }
-      else if (!strcmp(argv[i], "-comm"))
+      if (nh.getParam("feature_extraction/comm", iVal))
       {
-    	  pA.comm_medium = atoi(argv[++i]);
+    	  pA.comm_medium = iVal;
       }
-      else if (!strcmp(argv[i], "-rt"))
+      if (nh.getParam("feature_extraction/rt", sVal))
       {
-          sprintf(pA.ros_topic, "%s", argv[++i]);
+          sprintf(pA.ros_topic, "%s", sVal.c_str());
       }
-      else if (!strcmp(argv[i], "-b"))
+      if (nh.getParam("feature_extraction/b", iVal))
       {
-          pA.displayAllBb = atoi(argv[++i]);
+          pA.displayAllBb = iVal;
       }
-      else if (!strcmp(argv[i], "-sh"))
+      if (nh.getParam("feature_extraction/sh", iVal))
       {
-          pA.saturation_hack = atoi(argv[++i]);
+          pA.saturation_hack = iVal;
       }
-      else if (!strcmp(argv[i], "-st"))
+      if (nh.getParam("feature_extraction/st", val))
       {
-          pA.saturation_hack_value = atof(argv[++i]);
+          pA.saturation_hack_value = val;
       }
-      else if (!strcmp(argv[i], "-sv"))
+      if (nh.getParam("feature_extraction/sv", val))
       {
-          pA.saturation_mapped_value = atof(argv[++i]);
+          pA.saturation_mapped_value = val;
       }
-      else if (!strcmp(argv[i], "-ri"))
+      if (nh.getParam("feature_extraction/ri", iVal))
       {
-          pA.robot_id = atoi(argv[++i]);
+          pA.robot_id = iVal;
       }
-      else if (!strcmp(argv[i], "-pr")) //freenect processor
+      if (nh.getParam("feature_extraction/pr", iVal))
       {
-    	  pA.freenectProcessor = atoi(argv[++i]);
+    	  pA.freenectProcessor = iVal;
       }
-      else if (!strcmp(argv[i], "-fn")) //freenect processor
+      if (nh.getParam("feature_extraction/fn", iVal))
       {
-    	  pA.filterNoise = atoi(argv[++i]);
+    	  pA.filterNoise = iVal;
       }
-      else if (!strcmp(argv[i], "-nv")) //freenect processor
+      if (nh.getParam("feature_extraction/nv", bVal))
       {
-    	  pA.viz = false;
+    	  pA.viz = !bVal;
       }
-      else if (!strcmp(argv[i], "-view")) //freenect processor
+      if (nh.getParam("feature_extraction/view", iVal))
       {
-    	  pA.justViewPointCloud = atoi(argv[++i]);
+    	  pA.justViewPointCloud = iVal; 
       }
-      else if (!strcmp(argv[i], "-h"))
+      if (nh.getParam("feature_extraction/h", bVal))
       {
-        std::cout << "-dt: distance threshold for segmentation (float)"  << std::endl;
-        std::cout << "-ct: color threshold for segmentation (float) (currently set a very high (e.g. 100000) threshold to do proximity only segmentation)" << std::endl;
+        std::cout << "-dt: distance threshold for feature_extraction (float)"  << std::endl;
+        std::cout << "-ct: color threshold for feature_extraction (float) (currently set a very high (e.g. 100000) threshold to do proximity only feature_extraction)" << std::endl;
         std::cout << "-v: set hue value to select the cluster of interest (float)"  << std::endl;
         std::cout << "-m: set whether to do merging or not (boolean)" << std::endl;
         std::cout << "-t: set hue threshold for merging" << std::endl;
         std::cout << "-z: set depth threshold for merging (float)" << std::endl;
         std::cout << "-p: set whether to pre process the point cloud or not (boolean)" << std::endl;
-        std::cout << "-c: set color segmentation options, 0,1,2 correspond to none, rgb, hue" << std::endl;
+        std::cout << "-c: set color feature_extraction options, 0,1,2 correspond to none, rgb, hue" << std::endl;
         std::cout << "-src: point cloud source options 0,1,2 correspond to ROS, OPENNI, and KinectV2 respectively (int)." << std::endl;
         std::cout << "-rt: name of the ros topic of the incoming poin cloud (string)" << std::endl;
         std::cout << "-out: output options 0,1,2 corresponding to none, IRCP, ROS (int). IRCP support may not exist, exercise caution." << std::endl;
@@ -256,12 +261,12 @@ parseArguments(int argc, char **argv, parsedArguments &pA)
         std::cout << "-h: this help" << std::endl;
         return -1;
       }
-      else
+   /*   lse
       {
           std::cout << "Unknown argument: " << argv[i] << std::endl;
           unknownArgNum++;
       }
-  }
+  }*/
   std::cout << "hue_val set to: " << pA.hue_val << std::endl;
   std::cout << "hue_thresh set to: " << pA.hue_thresh << std::endl;
   std::cout << "z_thresh set to: " << pA.z_thresh << std::endl;
@@ -272,7 +277,7 @@ parseArguments(int argc, char **argv, parsedArguments &pA)
   std::cout << "ecc_dist_thresh set to: " << pA.ecc_dist_thresh << std::endl;
   std::cout << "ecc_color_thresh set to: " << pA.ecc_color_thresh << std::endl;
 
-  pA.ros_node = pA.ros_node || (pA.pc_source == 0) || (pA.comm_medium == comType::cROS) || (pA.output_type == comType::cROS);
+  pA.ros_node = pA.ros_node || (pA.pc_source == 0) || (pA.comm_medium == cROS) || (pA.output_type == cROS);
 
   return unknownArgNum;
 }
