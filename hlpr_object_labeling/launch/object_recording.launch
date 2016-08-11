@@ -1,0 +1,6 @@
+<launch>
+
+<node name="hlpr_object_labeling" pkg="hlpr_object_labeling" type="object_recording.py" respawn="true" output="screen">
+  </node>
+</launch>
+

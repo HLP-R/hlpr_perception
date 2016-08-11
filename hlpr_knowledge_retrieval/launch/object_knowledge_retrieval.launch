@@ -1,0 +1,6 @@
+<launch>
+
+<node name="object_knowledge_retrieval" pkg="object_knowledge_retrieval" type="object_knowledge_retrieval.py" respawn="false" output="screen">
+  </node>
+</launch>
+
