@@ -15,7 +15,7 @@ pf = None
 display = None
 initX = None
 minSize = 0.003
-filename = "/home/tesca/data/tracked_object_data.txt"
+filename = "tracked_object_data.txt"
 
 class filter:
     def __init__(self):

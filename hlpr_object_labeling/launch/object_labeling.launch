@@ -1,6 +1,7 @@
 <launch>
 
 <node name="hlpr_object_labeling" pkg="hlpr_object_labeling" type="object_labeling.py" respawn="false" output="screen">
+        <param name="data_loc" value="/home/siml/data/tesca/cups_tracked_object_data.txt" type="string"/>
   </node>
 </launch>
 

@@ -8,6 +8,7 @@ import cv2
 import roslib
 import rospy
 import pdb
+import tf
 from Tkinter import *
 from feature_extraction.msg import PcFeatureArray
 from hlpr_object_labeling.msg import LabeledObjects
@@ -24,7 +25,7 @@ sizeW = 3000	# sq m
 distW = 300	# m
 threshold = 200
 minSize = 0.01
-filename = "/home/tesca/data/tracked_object_data.txt"
+filename = None 
 
 def hsvDiff(c1,c2):
     hsv1 = c1[1:4]
@@ -71,7 +72,7 @@ def getMatchingLabel(allLabels, labels, cluster):
 
 class filter:
     def __init__(self):
-	rospy.init_node('labeling', anonymous=True)
+#	rospy.init_node('labeling', anonymous=True)
         self.subscriber = rospy.Subscriber("/beliefs/features", PcFeatureArray, self.cbClusters, queue_size = 1)
 	self.orderPub = rospy.Publisher("/beliefs/labels", LabeledObjects)
         self.labeled = None
@@ -80,6 +81,7 @@ class filter:
         self.ids = None
 	self.labels = None
 	self.initialized = False
+	self.br = tf.TransformBroadcaster()
 
     def run_filter(self, initX, initLabels, clusters):
         ordered = []
@@ -109,6 +111,7 @@ class filter:
     def cbClusters(self, ros_data):
 	clusterArr = ros_data
         clusters = ros_data.objects
+        transforms = ros_data.transforms
         if self.initialized is False:
 	    self.initX = []
 	    self.labels = []
@@ -124,9 +127,23 @@ class filter:
 	if len(clusters) is 0 or self.tracked is None:
 	    return
 	outMsg = LabeledObjects()
+	msgTime = rospy.Time.now()
+	outMsg.header.stamp = msgTime
 	outMsg.objects = self.tracked
 	outMsg.labels = self.ids
 	self.orderPub.publish(outMsg)
+	idx = 0
+        for l in self.ids:
+          t = None
+          for i in range(len(clusters)):
+	    if clusters[i] is self.tracked[idx]:
+		t = transforms[i]
+	  tl = (t.translation.x, t.translation.y, t.translation.z)
+	  r = (t.rotation.x, t.rotation.y, t.rotation.z, t.rotation.w)
+	  #self.br.sendTransform(tl, r, rospy.Time.now(), 'kinect_ir_optical_frame', l.data)
+	  self.br.sendTransform(tl, r, msgTime, l.data, 'kinect_ir_optical_frame')
+	  idx += 1
+	  
 	#self.idPub.publish(self.ids)
 
 class ui:
@@ -160,12 +177,28 @@ class ui:
 	    label = self.canvas.create_text((-c.points_centroid.x+0.5)*500, (-c.points_centroid.y + 0.5)*500,text=str(ids[idx].data),font="Verdana 10 bold")
 	    self.canvas.pack()
 
+def get_param(name, value=None):
+    private = "~%s" % name
+    if rospy.has_param(private):
+        return rospy.get_param(private)
+    elif rospy.has_param(name):
+        return rospy.get_param(name)
+    else:
+        return value
+
 def main(args):
-    global pf, display
+    global pf, display, filename
+    filename = get_param("labeling_data_loc")
+    print "reading from " + filename
+
     pf = filter()
     display = ui()
     display.master.after(10,display.startDrawing,pf)
     display.master.mainloop()
 
 if __name__ == '__main__':
+    #print "here"
+    rospy.init_node("object_labeling", anonymous=False)
+    rospy.loginfo("Initializing the object labeling node")
+
     main(sys.argv)
