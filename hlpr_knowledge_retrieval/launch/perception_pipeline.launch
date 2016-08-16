@@ -1,6 +1,6 @@
 <!-- Starts up everything needed to run the example listener/talker nodes. -->
 <launch>
-  <arg name="segmentation/nv" default="true" />
+  <!--arg name="segmentation/nv" default="true" />
   <arg name="segmentation/rt" default="/kinect/depth_registered/points" />
   <arg name="segmentation/v" default="340" />
   <arg name="segmentation/src" default="0" />
@@ -15,9 +15,11 @@
   <arg name="feature_extraction/nv" default="true" />
   <node pkg="feature_extraction" type="ft_ex" name="ft_ex" output="screen">
     <param name="feature_extraction/nv" value="$(arg feature_extraction/nv)" />
-  </node>
-  <node pkg="hlpr_object_labeling" type="object_labeling.py" name="hlpr_object_labeling">
+  </node-->
+  <node pkg="hlpr_object_labeling" type="object_labeling.py" name="hlpr_object_labeling" output="screen">
+    <param name="labeling_data_loc" value="/home/siml/data/tesca/cups_tracked_object_data.txt" type="string"/>
   </node>
   <node pkg="hlpr_knowledge_retrieval" type="object_knowledge_retrieval.py" name="hlpr_knowledge_retrieval" output="screen">
+    <param name="knowledge_data_loc" value="/home/siml/data/tesca/cups_" type="string"/>
   </node>
 </launch>
