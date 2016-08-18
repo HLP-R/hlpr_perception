@@ -130,6 +130,7 @@ cluster_cb (const segmentation::SegmentedClusters& msg)
 	++it;
     }
 
+    cluster_idx.clear();
     for (int i = 0; i < msg.cluster_ids.size(); i++){
 	std::vector<int> idx;
 	for (int j = 0; j < msg.cluster_ids[i].indices.size(); j++){
@@ -253,8 +254,7 @@ main (int argc, char **argv)
     pub.publish(rosMsg);
     objectPoseTF(rosMsg.transforms[0]);
 
-    std::cout << pA.ros_topic << std::endl;
-    // Publish out point cloud with cluster subtracted
+    // Get the indices of the cluster points from the selected cluster
     std::vector<int> selected_cluster_pts = cluster_idx[selected_cluster_index];
     boost::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (selected_cluster_pts));
     pcl::IndicesPtr indices (indicesptr);
@@ -265,7 +265,8 @@ main (int argc, char **argv)
     eifilter.setInputCloud (prev_cloud);
     eifilter.setIndices (indices);
     eifilter.filter(object_filtered_cloud);
-
+ 
+    // Publish the point cloud with the selected object removed
     sensor_msgs::PointCloud2 convert_msg;
     pcl::PCLPointCloud2 tmp1;
     pcl::toPCLPointCloud2(object_filtered_cloud, tmp1);

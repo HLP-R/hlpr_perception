@@ -184,7 +184,8 @@ public:
                    pcl::PointCloud<PointT>::CloudVectorType &clusters,
                    std::vector<pcl::PointCloud<pcl::Normal> > &cluster_normals,
                    pcl::PointCloud<PointT>::Ptr &contour,
-                   Eigen::Vector4f &used_plane_model);
+                   Eigen::Vector4f &used_plane_model,
+		   std::vector<std::vector<int>> &clusterIndices);
 
   void
   setWorkingVolumeThresholds(float* a);
@@ -194,6 +195,7 @@ public:
                   pcl::PointCloud<PointT>::CloudVectorType &clustersOut,
                   std::vector<pcl::PointCloud<pcl::Normal> > &clustersOutNormals,
                   Eigen::Vector4f &plane,
+		  std::vector<std::vector<int>> &clusterIndices,
 		  bool preProc = true, bool merge_clusters = true,
 		  bool viewer_enabled = true, bool noiseFilter = false);
 

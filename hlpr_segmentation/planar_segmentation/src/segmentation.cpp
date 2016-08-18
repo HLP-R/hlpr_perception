@@ -19,6 +19,7 @@
 #include <pcl_ros/point_cloud.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <segmentation/SegmentedClusters.h>
+#include <pcl/filters/extract_indices.h>
 //#include <utils_pcl_ros.hpp>
 
 #include <k2g.h>
@@ -26,6 +27,7 @@
 #include <signal.h>
 
 pcl::PointCloud<PointT>::ConstPtr prev_cloud;
+pcl::PointCloud<PointT> cloud_store;
 boost::mutex cloud_mutex;
 boost::mutex imageName_mutex;
 bool writePCD2File = false;
@@ -62,6 +64,7 @@ cloud_cb_ros_ (const sensor_msgs::PointCloud2ConstPtr& msg)
 
   pcl::PointCloud<PointT> cloud;
   pcl::fromPCLPointCloud2(pcl_pc, cloud);
+  pcl::copyPointCloud(cloud, cloud_store);
 
   cloud_mutex.lock ();
   prev_cloud = cloud.makeShared();
@@ -248,12 +251,26 @@ main (int argc, char **argv)
 		pcl::PointCloud<PointT>::CloudVectorType clusters;
             	std::vector<pcl::PointCloud<pcl::Normal> > clusterNormals;
 		Eigen::Vector4f plane;
+		std::vector<size_t> clusterIndices;
+		std::vector<std::vector<int>> clusterIndicesStore;
 
-  		selected_cluster_index = multi_plane_app.processOnce(prev_cloud,clusters,clusterNormals,plane,
+  		selected_cluster_index = multi_plane_app.processOnce(prev_cloud,clusters,clusterNormals,plane,clusterIndicesStore,
 			pA.pre_proc,
   		 	pA.merge_clusters, viz_, pA.filterNoise); //true is for the viewer
 		segmentation::SegmentedClusters msg;
 		msg.header.stamp = ros::Time::now();
+
+		// Pull out the cluster indices and put in msg
+		for (int ti = 0; ti < clusterIndicesStore.size(); ti++){
+		  segmentation::ClusterIndex cluster_idx_msg;
+		  for (int j = 0; j < clusterIndicesStore[ti].size(); j++){
+		    std_msgs::Int32 temp_msg;
+		    temp_msg.data = clusterIndicesStore[ti][j];
+		    cluster_idx_msg.indices.push_back(temp_msg);
+		  }
+		  msg.cluster_ids.push_back(cluster_idx_msg);
+		  //clusterIndices.insert(clusterIndices.end(),clusterIndicesStore[ti].begin(), clusterIndicesStore[ti].end()); // For removing ALL cluster points
+		}
 
 		for(int i = 0; i < clusters.size(); i++) {
 		    sensor_msgs::PointCloud2 out;

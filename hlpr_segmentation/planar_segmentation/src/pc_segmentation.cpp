@@ -259,7 +259,8 @@ float OpenNIOrganizedMultiPlaneSegmentation::getClosestPlaneModel(std::vector<pc
   int nRegions = 0;
   float closestDepth = 10.0;//MAX_Z_THRESH;
   closestIndex = -1;
-  std::cout<<"Found " << regions.size() << " regions" << std::endl;
+  if (verbose)
+    std::cout<<"Found " << regions.size() << " regions" << std::endl;
   for (size_t i = 0; i < regions.size (); i++)
   {
     Eigen::Vector3f centroid = regions[i].getCentroid ();
@@ -282,7 +283,8 @@ OpenNIOrganizedMultiPlaneSegmentation::segmentPointCloud(pcl::PointCloud<PointT>
                                                          pcl::PointCloud<PointT>::CloudVectorType &clusters,
                                                          std::vector<pcl::PointCloud<pcl::Normal> > &cluster_normals,
                                                          pcl::PointCloud<PointT>::Ptr &contour,
-                                                         Eigen::Vector4f &used_plane_model
+                                                         Eigen::Vector4f &used_plane_model,
+							 std::vector<std::vector<int>> &clusterIndices
                                                          )
 {
   std::vector<pcl::PlanarRegion<PointT>, Eigen::aligned_allocator<pcl::PlanarRegion<PointT> > > regions;
@@ -299,7 +301,7 @@ OpenNIOrganizedMultiPlaneSegmentation::segmentPointCloud(pcl::PointCloud<PointT>
 
 // Segment objects
   double segment_start = pcl::getTime ();
-  std::vector<size_t> clusterIndices;
+  //std::vector<size_t> clusterIndices;
   if (regions.size () > 0)
   {
     Eigen::Vector3f used_plane_centroid;
@@ -347,7 +349,7 @@ OpenNIOrganizedMultiPlaneSegmentation::segmentPointCloud(pcl::PointCloud<PointT>
           continue;
 
         clusters.push_back (cluster);
-        clusterIndices.push_back(i);
+        clusterIndices.push_back(euclidean_label_indices[i].indices); // Store indices to remove points
         pcl::copyPointCloud (*normal_cloud, euclidean_label_indices[i], cluster_normal);
         cluster_normals.push_back(cluster_normal);
       }
@@ -371,6 +373,7 @@ int OpenNIOrganizedMultiPlaneSegmentation::processOnce (
 		pcl::PointCloud<PointT>::CloudVectorType &clustersOut,
 		std::vector<pcl::PointCloud<pcl::Normal> > &clustersOutNormals,
 		Eigen::Vector4f &plane,
+		std::vector<std::vector<int>> &clusterIndices,
 		bool preProc, bool merge_clusters, bool viewer_enabled, bool noiseFilter)
 {
   if(!prev_cl)
@@ -394,7 +397,7 @@ int OpenNIOrganizedMultiPlaneSegmentation::processOnce (
   std::vector<pcl::PointCloud<pcl::Normal> > *used_cluster_normals;
   pcl::PointCloud<PointT>::Ptr contour (new pcl::PointCloud<PointT>);
 
-  segmentPointCloud(filtered_prev_cloud, clusters, cluster_normals, contour, plane);
+  segmentPointCloud(filtered_prev_cloud, clusters, cluster_normals, contour, plane, clusterIndices);
 
   if(clusters.empty())
   {
