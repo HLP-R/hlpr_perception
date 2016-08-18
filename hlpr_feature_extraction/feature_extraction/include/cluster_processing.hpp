@@ -91,7 +91,7 @@ private:
   bool viewer_enabled;
 
 public:
-  OpenNIOrganizedMultiPlaneSegmentation () : viewer_enabled(false), verbose(true)
+  OpenNIOrganizedMultiPlaneSegmentation () : viewer_enabled(false), verbose(false)
   {
   }
   /*~OpenNIOrganizedMultiPlaneSegmentation ()

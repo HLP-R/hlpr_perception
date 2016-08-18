@@ -25,12 +25,14 @@
 #include <segmentation/SegmentedClusters.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <utils_pcl_ros.hpp>
+#include <pcl/filters/extract_indices.h>
 
 #include <k2g.h>
 
 #include <signal.h>
 
 pcl::PointCloud<PointT>::ConstPtr prev_cloud;
+pcl::PointCloud<PointT> object_filtered_cloud;
 boost::mutex cloud_mutex;
 boost::mutex imageName_mutex;
 bool writePCD2File = false;
@@ -39,13 +41,16 @@ bool gotCluster = false;
 bool gotNormal = false;
 bool gotPlane = false;
 bool interrupt = false;
+bool gotCloud = false;
 pcl::PointCloud<PointT>::CloudVectorType clusters;
+std::vector<std::vector<int>> cluster_idx;
 std::vector<pcl::PointCloud<pcl::Normal> > normals;
 Eigen::Vector4f plane (0,0,0,0);
 const char *clusterRostopic = "/beliefs/clusters";
 const char *normalRostopic = "/beliefs/normals";
 const char *planeRostopic = "/beliefs/plane";
 const char *outRostopic = "/beliefs/features";
+const char *objectPCOutRostopic = "/beliefs/subtract_object";
 const char *transformRostopic = "/beliefs/tfs";
 
 void interruptFn(int sig) {
@@ -62,6 +67,45 @@ cluster_cb (const sensor_msgs::PointCloud2ConstPtr& cluster)
     clusters.push_back(*pclCloud);
     gotCluster = true;
 }*/
+
+// Add a subscriber to the raw point cloud for object subtraction
+void
+cloud_cb_ros_ (const sensor_msgs::PointCloud2ConstPtr& msg)
+{
+  pcl::PCLPointCloud2 pcl_pc;
+
+  if (msg->height == 1){ 
+    sensor_msgs::PointCloud2 new_cloud_msg;
+    new_cloud_msg.header = msg->header;
+    new_cloud_msg.height = 480;
+    new_cloud_msg.width = 640;
+    new_cloud_msg.fields = msg->fields;
+    new_cloud_msg.is_bigendian = msg->is_bigendian;
+    new_cloud_msg.point_step = msg->point_step;
+    new_cloud_msg.row_step = 20480;
+    new_cloud_msg.data = msg->data;
+    new_cloud_msg.is_dense = msg->is_dense;
+
+    pcl_conversions::toPCL(new_cloud_msg, pcl_pc);
+  }
+  else
+    pcl_conversions::toPCL(*msg, pcl_pc);
+
+  // Now we have access to cloud here
+  pcl::PointCloud<PointT> cloud;
+  pcl::fromPCLPointCloud2(pcl_pc, cloud);
+
+  cloud_mutex.lock();
+  // Store globally with constant pointer
+  prev_cloud = cloud.makeShared();
+  cloud_mutex.unlock();
+
+  gotCloud = true;
+
+}	
+
+
+
 
 void
 cluster_cb (const segmentation::SegmentedClusters& msg)
@@ -84,6 +128,14 @@ cluster_cb (const segmentation::SegmentedClusters& msg)
     for(int i = 0; i < 4; i++) {
 	plane[i] = *it;
 	++it;
+    }
+
+    for (int i = 0; i < msg.cluster_ids.size(); i++){
+	std::vector<int> idx;
+	for (int j = 0; j < msg.cluster_ids[i].indices.size(); j++){
+	   idx.push_back(msg.cluster_ids[i].indices[j].data); 
+	}
+	cluster_idx.push_back(idx);
     }
 
     gotCluster = true;
@@ -137,8 +189,8 @@ main (int argc, char **argv)
 
   pcl::Grabber* interface;
   ros::NodeHandle *nh;
-  ros::Subscriber normalSub, clusterSub, planeSub;
-  ros::Publisher pub,transformPub;
+  ros::Subscriber normalSub, clusterSub, planeSub, cloudSub;
+  ros::Publisher pub,transformPub, objectPub;
 
   bool spawnObject = true;
 
@@ -152,12 +204,14 @@ main (int argc, char **argv)
   std::cout << "Publishing ros topic: " << outRostopic << std::endl;
   //pub = nh->advertise<pc_segmentation::PcFeatures>(outRostopic,5);
   pub = nh->advertise<feature_extraction::PcFeatureArray>(outRostopic,5);
+  objectPub = nh->advertise<sensor_msgs::PointCloud2>(objectPCOutRostopic,5);
   //transformPub = nh->advertise<geometry_msgs::Transform>(transformRostopic,5);
 
 
   std::cout << "Using ros topic as input" << std::endl;
   //clusterSub = nh->subscribe<pcl::PointCloud<pcl::PointXYZRGB>>(clusterRostopic, 1, cluster_cb);
   clusterSub = nh->subscribe(clusterRostopic, 1, cluster_cb);
+  cloudSub = nh->subscribe(pA.ros_topic, 1, cloud_cb_ros_);
  // normalSub = nh->subscribe<pcl::PointCloud<pcl::Normal>>(normalRostopic, 1, normal_cb);
  // planeSub = nh->subscribe(planeRostopic, 1, plane_cb);
 
@@ -186,8 +240,8 @@ main (int argc, char **argv)
       continue;
 
     float angle = feats[selected_cluster_index].aligned_bounding_box.angle;
-    std::cout << "Selected cluster angle (rad, deg): " << angle << " " << angle*180.0/3.14159 << std::endl;
-    std::cout << "Selected cluster hue: " << feats[selected_cluster_index].hue << std::endl;
+    //std::cout << "Selected cluster angle (rad, deg): " << angle << " " << angle*180.0/3.14159 << std::endl;
+    //std::cout << "Selected cluster hue: " << feats[selected_cluster_index].hue << std::endl;
 
     feature_extraction::PcFeatureArray rosMsg;
     rosMsg.header.stamp = ros::Time::now();
@@ -200,6 +254,26 @@ main (int argc, char **argv)
     }
     pub.publish(rosMsg);
     objectPoseTF(rosMsg.transforms[0]);
+
+    std::cout << pA.ros_topic << std::endl;
+    // Publish out point cloud with cluster subtracted
+    std::vector<int> selected_cluster_pts = cluster_idx[selected_cluster_index];
+    boost::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (selected_cluster_pts));
+    pcl::IndicesPtr indices (indicesptr);
+
+    // Removes the clusters from the point cloud
+    pcl::ExtractIndices<PointT> eifilter;
+    eifilter.setNegative (true);
+    eifilter.setInputCloud (prev_cloud);
+    eifilter.setIndices (indices);
+    eifilter.filter(object_filtered_cloud);
+
+    sensor_msgs::PointCloud2 convert_msg;
+    pcl::PCLPointCloud2 tmp1;
+    pcl::toPCLPointCloud2(object_filtered_cloud, tmp1);
+    pcl_conversions::fromPCL(tmp1, convert_msg);
+    objectPub.publish(convert_msg);
+
     /*if(spawnObject)
     {
       visualization_msgs::Marker marker;
