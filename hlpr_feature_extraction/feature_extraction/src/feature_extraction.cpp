@@ -112,28 +112,6 @@ int
 main (int argc, char **argv)
 {
 
-  parsedArguments pA;
-  if(parseArguments(argc, argv, pA) < 0)
-    return 0;
-
-  ridiculous_global_variables::ignore_low_sat       = pA.saturation_hack;
-  ridiculous_global_variables::saturation_threshold = pA.saturation_hack_value;
-  ridiculous_global_variables::saturation_mapped_value = pA.saturation_mapped_value;
-
-  OpenNIOrganizedMultiPlaneSegmentation multi_plane_app;
-
-  pcl::PointCloud<PointT>::Ptr cloud_ptr (new pcl::PointCloud<PointT>);
-  pcl::PointCloud<pcl::Normal>::Ptr ncloud_ptr (new pcl::PointCloud<pcl::Normal>);
-  pcl::PointCloud<pcl::Label>::Ptr label_ptr (new pcl::PointCloud<pcl::Label>);
-
-  boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
-  if(pA.viz) {
-    viewer = cloudViewer(cloud_ptr);
-    multi_plane_app.setViewer(viewer);
-  }
-
-  float workSpace[] = {-0.3,0.4,-0.25,0.35,0.3,2.0};//Simon on the other side:{-0.1,0.6,-0.4,0.15,0.7,1.1};//{-0.5,0.6,-0.4,0.4,0.4,1.1};
-  multi_plane_app.setWorkingVolumeThresholds(workSpace);
 
   pcl::Grabber* interface;
   ros::NodeHandle *nh;
@@ -147,7 +125,28 @@ main (int argc, char **argv)
 
   std::cout << "ros node initialized" << std::endl;
   ros::init(argc, argv, "feature_extraction",ros::init_options::NoSigintHandler);
-  nh = new ros::NodeHandle();
+  nh = new ros::NodeHandle("~");
+  parsedArguments pA;
+  if(parseArguments(argc, argv, pA, *nh) < 0)
+    return 0;
+  ridiculous_global_variables::ignore_low_sat       = pA.saturation_hack;
+  ridiculous_global_variables::saturation_threshold = pA.saturation_hack_value;
+  ridiculous_global_variables::saturation_mapped_value = pA.saturation_mapped_value;
+
+  OpenNIOrganizedMultiPlaneSegmentation multi_plane_app;
+
+  float workSpace[] = {-0.3,0.4,-0.25,0.35,0.3,2.0};//Simon on the other side:{-0.1,0.6,-0.4,0.15,0.7,1.1};//{-0.5,0.6,-0.4,0.4,0.4,1.1};
+  multi_plane_app.setWorkingVolumeThresholds(workSpace);
+  pcl::PointCloud<PointT>::Ptr cloud_ptr (new pcl::PointCloud<PointT>);
+  pcl::PointCloud<pcl::Normal>::Ptr ncloud_ptr (new pcl::PointCloud<pcl::Normal>);
+  pcl::PointCloud<pcl::Label>::Ptr label_ptr (new pcl::PointCloud<pcl::Label>);
+
+  boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
+  if(pA.viz) {
+    viewer = cloudViewer(cloud_ptr);
+    multi_plane_app.setViewer(viewer);
+  }
+
 
   std::cout << "Publishing ros topic: " << outRostopic << std::endl;
   //pub = nh->advertise<pc_segmentation::PcFeatures>(outRostopic,5);
@@ -177,7 +176,7 @@ main (int argc, char **argv)
     int selected_cluster_index = -1;
     if(cloud_mutex.try_lock ())
     {
-      selected_cluster_index = multi_plane_app.processOnce(clusters,normals,feats,plane,pA.hue_val,pA.merge_clusters,pA.hue_thresh, pA.z_thresh, pA.euc_thresh);
+      selected_cluster_index = multi_plane_app.processOnce(clusters,normals,feats,plane,pA.hue_val,pA.merge_clusters,pA.viz,pA.hue_thresh, pA.z_thresh, pA.euc_thresh);
      // pub.publish(feats);
       cloud_mutex.unlock();
     }

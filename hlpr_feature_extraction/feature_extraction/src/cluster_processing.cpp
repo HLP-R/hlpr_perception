@@ -469,7 +469,7 @@ int OpenNIOrganizedMultiPlaneSegmentation::processOnce (
 		std::vector<pcl::PointCloud<pcl::Normal> > &normals,
 		std::vector<pc_cluster_features> &feats, 
 		Eigen::Vector4f &plane,
-		double main_hue, bool merge_clusters, double hue_thresh, double z_thresh, double euc_thresh)
+		double main_hue, bool merge_clusters, bool viewer_enabled, double hue_thresh, double z_thresh, double euc_thresh)
 {
 
 // misc variables, find a better way than static
@@ -519,8 +519,8 @@ int OpenNIOrganizedMultiPlaneSegmentation::processOnce (
   if(verbose)
     std::cout << "Feature extraction and clusters of interest detection took " << double (extract_end - outer_start) << std::endl;
 
- // if(viewer_enabled)
- // {
+  if(viewer_enabled)
+  {
    // if (!viewer->updatePointCloud<PointT> (filtered_prev_cloud, "cloud"))
    // {
    //   viewer->addPointCloud<PointT> (filtered_prev_cloud, "cloud");
@@ -538,7 +538,7 @@ int OpenNIOrganizedMultiPlaneSegmentation::processOnce (
     //else11
     //if(fittedBoxes.size() > 0)
     // displayBoundingBox(fittedBoxes[color_index],0);
-  //}
+  }
 
   prev_models_size = clusters.size();
   prev_cluster_num = clusters.size();

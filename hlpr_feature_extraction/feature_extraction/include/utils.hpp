@@ -10,6 +10,7 @@
 #include <vector>
 #include <string>
 #include <Eigen/Core>
+#include <ros/ros.h>
 
 #define MIN(X,Y) (((X) < (Y)) ? (X) : (Y))
 #define MAX(X,Y) (((X) > (Y)) ? (X) : (Y))
@@ -66,10 +67,10 @@ struct parsedArguments
 		  	  	  	  pre_proc(true),seg_color_ind(2),merge_clusters(true),
 		  	  	      ecc_dist_thresh(0.05f), ecc_color_thresh(25), 
 					  //use_rostopic(false), use_openni(false), use_kinectv2(true), displayAllBb(false),
-					  pc_source(2), output_type(comType::cIRCP), comm_medium(comType::cIRCP), ros_node(false), displayAllBb(false),
+					  pc_source(2), output_type(cIRCP), comm_medium(cIRCP), ros_node(false), displayAllBb(false),
 		  	  	      saturation_hack(true),saturation_hack_value(0.2f), saturation_mapped_value(-1000.0f),
 		  	  	      robot_id(13), freenectProcessor(2), filterNoise(false), justViewPointCloud(false), viz(true)
-		  	  	      {sprintf(ros_topic,"asus_filtered"); ros_node = ros_node || (pc_source == 0) || (comm_medium == comType::cROS) || (output_type == comType::cROS); }
+		  	  	      {sprintf(ros_topic,"asus_filtered"); ros_node = ros_node || (pc_source == 0) || (comm_medium == cROS) || (output_type == cROS); }
 };
 
 template <class pcType>
@@ -466,7 +467,7 @@ void
 fillInIndices(std::vector<int> &indices, int start = 0, int end = -1, bool push_back = true);
 
 int
-parseArguments(int argc, char **argv, parsedArguments &pA);
+parseArguments(int argc, char **argv, parsedArguments &pA, ros::NodeHandle &nh);
 
 //not my fault, c++ should have implemented reflection and lambda functions sooner
 //and no i am not going to try to use rtii, boost or some other library

@@ -289,7 +289,7 @@ public:
                   std::vector<pcl::PointCloud<pcl::Normal> > &clustersOutNormals,
 		  std::vector<pc_cluster_features> &feats, 
 		  Eigen::Vector4f &plane,
-		  double main_hue, bool merge_clusters = true, double hue_thresh = 1.0, double z_thresh = 1.0, double euc_thresh = -1.0);
+		  double main_hue, bool merge_clusters = true, bool viewer_enabled = true, double hue_thresh = 1.0, double z_thresh = 1.0, double euc_thresh = -1.0);
 
 };
 
