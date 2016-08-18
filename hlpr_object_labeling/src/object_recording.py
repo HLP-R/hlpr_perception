@@ -14,7 +14,7 @@ from feature_extraction.msg import PcFeatureArray
 pf = None
 display = None
 initX = None
-minSize = 0.003
+minSize = 0.001
 filename = "tracked_object_data.txt"
 
 class filter:
