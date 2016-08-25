@@ -45,7 +45,7 @@ Cube_2_Arrows(pcl::ModelCoefficients &cube, boost::shared_ptr<pcl::visualization
 }
 
 void
-fillRosMessage (feature_extraction::PcFeatures &outRosMsg, const pc_cluster_features &inObjFeatures)
+fillRosMessage (hlpr_feature_extraction::PcFeatures &outRosMsg, const pc_cluster_features &inObjFeatures)
 {
   outRosMsg.header.stamp = ros::Time::now();
 

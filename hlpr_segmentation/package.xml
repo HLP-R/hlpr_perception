@@ -1,5 +1,5 @@
 <package format="2">
-  <name>segmentation</name>
+  <name>hlpr_segmentation</name>
   <version>0.0.1</version>
   <description>Object segmentation</description>
   <maintainer email="tesca.fitzgerald@cc.gatech.edu">Tesca Fitzgerald</maintainer>

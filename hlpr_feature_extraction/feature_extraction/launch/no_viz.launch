@@ -1,7 +1,0 @@
-<!-- Starts up everything needed to run the example listener/talker nodes. -->
-<launch>
-  <arg name="feature_extraction/nv" default="false" />
-  <node pkg="feature_extraction" type="ft_ex" name="ft_ex" output="screen">
-    <param name="feature_extraction/nv" value="$(arg feature_extraction/nv)" />
-  </node>
-</launch>

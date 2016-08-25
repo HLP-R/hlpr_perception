@@ -1,5 +1,5 @@
 <package format="2">
-  <name>feature_extraction</name>
+  <name>hlpr_feature_extraction</name>
   <version>0.0.1</version>
   <description>Feature Extraction</description>
   <maintainer email="tesca.fitzgerald@cc.gatech.edu">Tesca Fitzgerald</maintainer>
@@ -15,4 +15,5 @@
   <depend>rospy</depend>
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
+  <depend>hlpr_segmentation</depend>
 </package>

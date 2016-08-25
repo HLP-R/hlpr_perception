@@ -20,9 +20,9 @@
 #include <pcl/PCLPointCloud2.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
-#include <feature_extraction/PcFeatures.h>
-#include <feature_extraction/PcFeatureArray.h>
-#include <segmentation/SegmentedClusters.h>
+#include <hlpr_feature_extraction/PcFeatures.h>
+#include <hlpr_feature_extraction/PcFeatureArray.h>
+#include <hlpr_segmentation/SegmentedClusters.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <utils_pcl_ros.hpp>
 #include <pcl/filters/extract_indices.h>
@@ -108,7 +108,7 @@ cloud_cb_ros_ (const sensor_msgs::PointCloud2ConstPtr& msg)
 
 
 void
-cluster_cb (const segmentation::SegmentedClusters& msg)
+cluster_cb (const hlpr_segmentation::SegmentedClusters& msg)
 {
     clusters.clear();
     for(int i = 0; i < msg.clusters.size(); i++) {
@@ -177,7 +177,7 @@ main (int argc, char **argv)
   processor freenectprocessor = OPENGL;
 
   std::cout << "ros node initialized" << std::endl;
-  ros::init(argc, argv, "feature_extraction",ros::init_options::NoSigintHandler);
+  ros::init(argc, argv, "hlpr_feature_extraction",ros::init_options::NoSigintHandler);
   nh = new ros::NodeHandle("~");
   parsedArguments pA;
   if(parseArguments(argc, argv, pA, *nh) < 0)
@@ -202,7 +202,7 @@ main (int argc, char **argv)
 
   std::cout << "Publishing ros topic: " << outRostopic << std::endl;
   //pub = nh->advertise<pc_segmentation::PcFeatures>(outRostopic,5);
-  pub = nh->advertise<feature_extraction::PcFeatureArray>(outRostopic,5);
+  pub = nh->advertise<hlpr_feature_extraction::PcFeatureArray>(outRostopic,5);
   objectPub = nh->advertise<sensor_msgs::PointCloud2>(objectPCOutRostopic,5);
   //transformPub = nh->advertise<geometry_msgs::Transform>(transformRostopic,5);
 
@@ -242,11 +242,11 @@ main (int argc, char **argv)
     //std::cout << "Selected cluster angle (rad, deg): " << angle << " " << angle*180.0/3.14159 << std::endl;
     //std::cout << "Selected cluster hue: " << feats[selected_cluster_index].hue << std::endl;
 
-    feature_extraction::PcFeatureArray rosMsg;
+    hlpr_feature_extraction::PcFeatureArray rosMsg;
     rosMsg.header.stamp = ros::Time::now();
 
     for(int i = 0; i < feats.size(); i++) {
-      feature_extraction::PcFeatures ft;
+      hlpr_feature_extraction::PcFeatures ft;
       fillRosMessage(ft, feats[i]);
       rosMsg.objects.push_back(ft);
       rosMsg.transforms.push_back(ft.transform);

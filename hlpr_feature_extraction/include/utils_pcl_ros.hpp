@@ -17,7 +17,7 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <visualization_msgs/Marker.h>
-#include <feature_extraction/PcFeatures.h>
+#include <hlpr_feature_extraction/PcFeatures.h>
 #include <tf2_ros/transform_broadcaster.h>
 
 /*
@@ -44,13 +44,13 @@ Box3D
 boundingBoxWithCoeff(pcl::PointCloud<PointT> &cluster, pcl::ModelCoefficients::Ptr coefficients, pcl::PointCloud<PointT>::Ptr &cloud_transformed);
 
 void
-fillRosMessage (feature_extraction::PcFeatures &outRosMsg, const pc_cluster_features &inObjFeatures);
+fillRosMessage (hlpr_feature_extraction::PcFeatures &outRosMsg, const pc_cluster_features &inObjFeatures);
 
 void
 objectPoseTF(geometry_msgs::Transform geom_transform);
 
 void
-getObjectMarker(visualization_msgs::Marker &marker, feature_extraction::PcFeatures &feats);
+getObjectMarker(visualization_msgs::Marker &marker, hlpr_feature_extraction::PcFeatures &feats);
 
 
 template<class pcType>

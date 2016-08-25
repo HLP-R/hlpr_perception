@@ -1,8 +1,0 @@
-<!-- Starts up everything needed to run the example listener/talker nodes. -->
-<launch>
-  <!-- arg name="segmentation/viz" default="true" / -->
-
-  <node pkg="feature_extraction" type="ft_ex" name="ft_ex" output="screen">
-    <!-- param name="segmentation/viz" value="$(arg segmentation/viz)" / -->
-  </node>
-</launch>

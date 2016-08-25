@@ -18,7 +18,7 @@
 #include <pcl/PCLPointCloud2.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include <segmentation/SegmentedClusters.h>
+#include <hlpr_segmentation/SegmentedClusters.h>
 #include <pcl/filters/extract_indices.h>
 //#include <utils_pcl_ros.hpp>
 
@@ -142,7 +142,7 @@ main (int argc, char **argv)
   boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGB>> cloud;
 
   std::cout << "ros node initialized" << std::endl;
-  ros::init(argc, argv, "segmentation",ros::init_options::NoSigintHandler);
+  ros::init(argc, argv, "hlpr_segmentation",ros::init_options::NoSigintHandler);
   nh = new ros::NodeHandle("~");
  // nh->getParam("segmentation/viz", viz_);
  // std::cout<<"viz is set to " << viz_ << endl;
@@ -169,7 +169,8 @@ main (int argc, char **argv)
     multi_plane_app.setViewer(viewer);
   }
 
-  float workSpace[] = {-0.3,0.4,-0.25,0.35,0.3,2.0};//Simon on the other side:{-0.1,0.6,-0.4,0.15,0.7,1.1};//{-0.5,0.6,-0.4,0.4,0.4,1.1};
+ // float workSpace[] = {-0.3,0.4,-0.25,0.35,0.3,2.0};
+  float workSpace[] = {-0.55,0.5,-0.4,0.3,0.3,2.0};
   multi_plane_app.setWorkingVolumeThresholds(workSpace);
 
   //if(pA.output_type == comType::cROS)
@@ -178,7 +179,7 @@ main (int argc, char **argv)
  //   clusterPub = nh->advertise<pcl::PointCloud<pcl::PointXYZRGB>>(clusterOutRostopic,5);
  //   normalPub = nh->advertise<pcl::PointCloud<pcl::Normal>>(normalOutRostopic,5);
  //   planePub = nh->advertise<std_msgs::Float32MultiArray>(planeOutRostopic,5);
-    msgPub = nh->advertise<segmentation::SegmentedClusters>(segOutRostopic,5);
+    msgPub = nh->advertise<hlpr_segmentation::SegmentedClusters>(segOutRostopic,5);
  // }
 
   switch (pA.pc_source)
@@ -257,12 +258,12 @@ main (int argc, char **argv)
   		selected_cluster_index = multi_plane_app.processOnce(prev_cloud,clusters,clusterNormals,plane,clusterIndicesStore,
 			pA.pre_proc,
   		 	pA.merge_clusters, viz_, pA.filterNoise); //true is for the viewer
-		segmentation::SegmentedClusters msg;
+		hlpr_segmentation::SegmentedClusters msg;
 		msg.header.stamp = ros::Time::now();
 
 		// Pull out the cluster indices and put in msg
 		for (int ti = 0; ti < clusterIndicesStore.size(); ti++){
-		  segmentation::ClusterIndex cluster_idx_msg;
+		  hlpr_segmentation::ClusterIndex cluster_idx_msg;
 		  for (int j = 0; j < clusterIndicesStore[ti].size(); j++){
 		    std_msgs::Int32 temp_msg;
 		    temp_msg.data = clusterIndicesStore[ti][j];
