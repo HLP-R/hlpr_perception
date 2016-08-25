@@ -13,6 +13,9 @@
   <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>hlpr_object_labeling</run_depend>
+  <run_depend>hlpr_segmentation</run_depend>
+  <run_depend>hlpr_feature_extraction</run_depend>
 
   <export>
     <metapackage />

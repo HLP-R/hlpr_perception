@@ -3,9 +3,10 @@ project(hlpr_object_labeling)
 
 find_package(catkin REQUIRED COMPONENTS message_generation rospy std_msgs geometry_msgs sensor_msgs feature_extraction)
 
+catkin_python_setup()
+
 add_message_files(
-  FILES  # e.g. Floats.msg HeaderString.msg
-  #SegmentedClusters.msg
+  FILES
   LabeledObjects.msg
 )
 

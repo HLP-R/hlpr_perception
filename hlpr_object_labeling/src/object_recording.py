@@ -14,8 +14,15 @@ from feature_extraction.msg import PcFeatureArray
 pf = None
 display = None
 initX = None
-minSize = 0.001
-filename = "tracked_object_data.txt"
+
+def get_param(name, value=None):
+    private = "~%s" % name
+    if rospy.has_param(private):
+        return rospy.get_param(private)
+    elif rospy.has_param(name):
+        return rospy.get_param(name)
+    else:
+        return value
 
 class filter:
     def __init__(self):
@@ -26,7 +33,9 @@ class filter:
 	self.labeledIdx = 0
 	self.initX = []
 	self.finished = False
-	self.outf = open(filename, "w")
+	self.filename = get_param("feature_file_location", "tracked_object_data.txt")
+	self.minSize = get_param("min_object_size", 0.001)
+	self.outf = open(self.filename, "w")
 
     def cbClusters(self, ros_data):
 	clusterArr = ros_data
@@ -37,8 +46,8 @@ class filter:
 	    self.initX = []
 	    for c in clusters:
 		size = c.bb_dims.x * c.bb_dims.y
-		print 'object size: ' + str(size)
-		if size > minSize:
+		print 'Object size: ' + str(size)
+		if size > self.minSize:
 		    self.initX.append(c)
 	    if len(self.initX) is 0:
 	        return
@@ -46,7 +55,7 @@ class filter:
 	    self.initialized = True
 	elif self.labeled is False:
 	    var = raw_input("Enter label for object " + str(self.labeledIdx) + ": ")
-	    print "you entered", var
+	    print "You entered: ", var
 	    c = self.initX[self.labeledIdx]
 	    r = c.rgba_color.r
 	    g = c.rgba_color.g
@@ -60,6 +69,9 @@ class filter:
 	elif self.finished is False:
 	    self.outf.close()
 	    self.finished = True
+	elif self.finished is True:
+	    print "Objects written to " + str(self.filename)
+	    sys.exit()
 
 class ui:
     def __init__(self):
@@ -73,6 +85,8 @@ class ui:
 
     def drawClusters(self,clusters):
 	if clusters is None:
+	    print "Waiting for object messages..."
+	    time.sleep(1.0)
 	    return
 	self.canvas.delete("all")
 	for idx in range(0,len(clusters)):
