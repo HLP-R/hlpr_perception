@@ -9,7 +9,7 @@ import roslib
 import rospy
 import pdb
 from Tkinter import *
-from feature_extraction.msg import PcFeatureArray
+from hlpr_feature_extraction.msg import PcFeatureArray
 
 pf = None
 display = None

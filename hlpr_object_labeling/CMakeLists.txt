@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(hlpr_object_labeling)
 
-find_package(catkin REQUIRED COMPONENTS message_generation rospy std_msgs geometry_msgs sensor_msgs feature_extraction)
+find_package(catkin REQUIRED COMPONENTS message_generation rospy std_msgs geometry_msgs sensor_msgs hlpr_feature_extraction)
 
 catkin_python_setup()
 
@@ -16,10 +16,10 @@ generate_messages(
   std_msgs
   geometry_msgs
   sensor_msgs
-  feature_extraction
+  hlpr_feature_extraction
 )
 
 catkin_package(
-  CATKIN_DEPENDS message_runtime std_msgs geometry_msgs sensor_msgs feature_extraction
+  CATKIN_DEPENDS message_runtime std_msgs geometry_msgs sensor_msgs hlpr_feature_extraction
 )
 

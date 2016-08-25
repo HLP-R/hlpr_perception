@@ -10,7 +10,7 @@ import rospy
 import pdb
 import tf
 from Tkinter import *
-from feature_extraction.msg import PcFeatureArray
+from hlpr_feature_extraction.msg import PcFeatureArray
 from hlpr_object_labeling.msg import LabeledObjects
 from std_msgs.msg import String
 
