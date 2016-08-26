@@ -81,31 +81,6 @@ class filter:
 	  self.br.sendTransform(tl, r, msgTime, l, 'kinect_ir_optical_frame')
 	  idx += 1
 
-    def run_filter(self, labels, clusters):
-        ordered = []
-        tracked = []
-	errors = []
-	ids = []
-        count = len(clusters)
-	isEmpty = True
-        for i in range(0,count):
-       	    assignment,error = self.getMatchingLabels(labels,clusters)
-	    if error <= self.errorThreshold:
-		isEmpty = False
-	        ordered.append(match)
-	        tracked.append(match)
-		errors.append(error)
-		string = String()
-		string.data = label
-		ids.append(string)
-  	    else:
-	        ordered.append(None)
-		errors.append(0.0)
-	if isEmpty is True:
-	    return None, None, errors, None 
-	else:
-            return ordered,tracked,errors,ids
-
     def loadObjects(self):
       self.initX = []
       self.labels = []
@@ -121,8 +96,11 @@ class filter:
       	g2 = c2.rgba_color.g
       	b2 = c2.rgba_color.b
    	hsv2 = cv2.cvtColor(np.array([[(r2,g2,b2)]],dtype='float32'), cv2.COLOR_RGB2HSV)
-
-    	return abs(hsv2[0][0][0]-float(hsv1[0])), abs(hsv2[0][0][1]-float(hsv1[1])), abs(hsv2[0][0][2]-float(hsv1[2]))
+	h1 = hsv2[0][0][0]
+	h2 = float(hsv1[0])
+	huediff = math.degrees(math.atan2(math.sin(math.radians(h1-h2)), math.cos(math.radians(h1-h2))))
+    	#return abs(hsv2[0][0][0]-float(hsv1[0])), abs(hsv2[0][0][1]-float(hsv1[1])), abs(hsv2[0][0][2]-float(hsv1[2]))
+    	return abs(huediff), abs(hsv2[0][0][1]-float(hsv1[1])), abs(hsv2[0][0][2]-float(hsv1[2]))
 
     def sizeDiff(self, c1,c2):
     	size = c2.bb_dims.x * c2.bb_dims.y
@@ -146,7 +124,6 @@ class filter:
             e = self.calculateError(l, c)
 	    labelErrors.append(e)
 	  errorMatrix.append(labelErrors)
-
 	## Find the label assignment that minimizes total error
 	minMatch = None
 	minError = -1
@@ -155,24 +132,30 @@ class filter:
 	for a in assn:
 	  e = 0
 	  i = 0
+	  newAssn = []
 	  for idx in a:
 	    if idx < len(expected):
 	      e += errorMatrix[idx][i]
+	      newAssn.append(idx)
+	    else:
+	      newAssn.append(-1)
 	    i += 1
 	  if minMatch is None or e < minError:
-	    minMatch = a
+	    minMatch = newAssn
 	    minError = e
+	#print "best: " + str(minMatch) + " with error " + str(minError)
 
 	## Convert the best assignment back to a list of labels
 	match = []
 	ordered = []
 	for i in range(len(minMatch)):
-	  if minMatch[i] is None:
+	  if minMatch[i] is -1:
 	    match.append(None)
 	    ordered.append(None)
 	  else:
-	    match.append(clusters[idx])
-	    ordered.append(labels[idx])
+	    #print str(errorMatrix[minMatch[i]][i]) + " + "
+	    match.append(clusters[i])
+	    ordered.append(labels[minMatch[i]])
     	return match, ordered, minError
 
 class ui:
