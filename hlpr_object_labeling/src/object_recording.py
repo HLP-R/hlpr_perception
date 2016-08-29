@@ -33,7 +33,7 @@ class filter:
 	self.labeledIdx = 0
 	self.initX = []
 	self.finished = False
-	self.filename = get_param("feature_file_location", "tracked_object_data.txt")
+	self.filename = os.path.expanduser(get_param("feature_file_location", "tracked_object_data.txt"))
 	self.minSize = get_param("min_object_size", 0.001)
 	self.outf = open(self.filename, "w")
 

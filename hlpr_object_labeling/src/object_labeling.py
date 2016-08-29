@@ -45,7 +45,7 @@ class filter:
 	self.valW = get_param("hsv_val_weight",1)
 	self.sizeW = get_param("size_weight",50000)
 	self.errorThreshold = get_param("error_threshold",200)
-    	self.filename = get_param("feature_file_location")
+    	self.filename = os.path.expanduser(get_param("feature_file_location"))
 
     def cbClusters(self, ros_data):
 	#Initialize object feature values
