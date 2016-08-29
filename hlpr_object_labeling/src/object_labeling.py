@@ -9,6 +9,7 @@ import roslib
 import rospy
 import pdb
 import tf
+import itertools
 from Tkinter import *
 from hlpr_feature_extraction.msg import PcFeatureArray
 from hlpr_object_labeling.msg import LabeledObjects
@@ -44,7 +45,7 @@ class filter:
 	self.valW = get_param("hsv_val_weight",1)
 	self.sizeW = get_param("size_weight",50000)
 	self.errorThreshold = get_param("error_threshold",200)
-    	self.filename = get_param("feature_file_location")
+    	self.filename = os.path.expanduser(get_param("feature_file_location"))
 
     def cbClusters(self, ros_data):
 	#Initialize object feature values
@@ -58,7 +59,8 @@ class filter:
         transforms = ros_data.transforms
 
 	#Classify clusters
-	self.labeled, self.tracked, self.errors, self.ids = self.run_filter(self.initX, self.labels, clusters)
+	#self.labeled, self.tracked, self.errors, self.ids = self.run_filter(self.initX, self.labels, clusters)
+	self.tracked, self.ids, self.error = self.getMatchingLabels(self.initX, self.labels, clusters)
 
 	#Publish labels
 	if len(clusters) is 0 or self.tracked is None:
@@ -73,46 +75,18 @@ class filter:
 	#Publish transforms
 	idx = 0
         for l in self.ids:
-          t = None
-          for i in range(len(clusters)):
-	    if clusters[i] is self.tracked[idx]:
-		t = transforms[i]
+  	  t = transforms[idx]
 	  tl = (t.translation.x, t.translation.y, t.translation.z)
 	  r = (t.rotation.x, t.rotation.y, t.rotation.z, t.rotation.w)
-	  self.br.sendTransform(tl, r, msgTime, l.data, 'kinect_ir_optical_frame')
+	  self.br.sendTransform(tl, r, msgTime, l, 'kinect_ir_optical_frame')
 	  idx += 1
-
-    def run_filter(self, initX, initLabels, clusters):
-        ordered = []
-        tracked = []
-	errors = []
-	ids = []
-        count = len(clusters)
-	isEmpty = True
-        for i in range(0,count):
-       	    match,label,error = self.getMatchingLabel(initX,initLabels,clusters[i])
-	    if error <= self.errorThreshold:
-		isEmpty = False
-	        ordered.append(match)
-	        tracked.append(match)
-		errors.append(error)
-		string = String()
-		string.data = label
-		ids.append(string)
-  	    else:
-	        ordered.append(None)
-		errors.append(0.0)
-	if isEmpty is True:
-	    return None, None, errors, None 
-	else:
-            return ordered,tracked,errors,ids
 
     def loadObjects(self):
       self.initX = []
       self.labels = []
       objFile = open(self.filename, 'r')
       for line in objFile.readlines():
-	self.initX.append(line.split(','))
+	self.initX.append(line[:-1].split(','))
 	self.labels.append(line.split(',')[0])
       print str(len(self.initX)) + ' objects loaded'
 	  
@@ -122,14 +96,17 @@ class filter:
       	g2 = c2.rgba_color.g
       	b2 = c2.rgba_color.b
    	hsv2 = cv2.cvtColor(np.array([[(r2,g2,b2)]],dtype='float32'), cv2.COLOR_RGB2HSV)
-
-    	return abs(hsv2[0][0][0]-float(hsv1[0])), abs(hsv2[0][0][1]-float(hsv1[1])), abs(hsv2[0][0][2]-float(hsv1[2]))
+	h1 = hsv2[0][0][0]
+	h2 = float(hsv1[0])
+	huediff = math.degrees(math.atan2(math.sin(math.radians(h1-h2)), math.cos(math.radians(h1-h2))))
+    	#return abs(hsv2[0][0][0]-float(hsv1[0])), abs(hsv2[0][0][1]-float(hsv1[1])), abs(hsv2[0][0][2]-float(hsv1[2]))
+    	return abs(huediff), abs(hsv2[0][0][1]-float(hsv1[1])), abs(hsv2[0][0][2]-float(hsv1[2]))
 
     def sizeDiff(self, c1,c2):
     	size = c2.bb_dims.x * c2.bb_dims.y
     	return abs(size - float(c1[4]))
 
-    def calculateError(self, init, prev, cluster):
+    def calculateError(self, init, cluster):
     	size = self.sizeW * self.sizeDiff(init,cluster)
     	hueDiff, satDiff, valDiff = self.hsvDiff(init,cluster)
     	hue = self.hueW * hueDiff
@@ -138,24 +115,56 @@ class filter:
     	total = float(hue + sat + val + size)
     	return total
 
-    def getMatchingLabel(self, allLabels, labels, cluster):
-    	minError = -1
-    	match = None
-    	idx = 0
-    	for c in allLabels:
-          e = self.calculateError(c, None, cluster)
-          if match is None or e < minError:
-            match = c
-	    label = labels[idx]
-            minError = e
-	  idx = idx + 1
-    	return cluster, label, minError
+    def getMatchingLabels(self, expected, labels, clusters):
+	## Evaluate all possible cluster-label pairs
+	errorMatrix = []
+    	for l in expected:
+	  labelErrors = []
+	  for c in clusters:
+            e = self.calculateError(l, c)
+	    labelErrors.append(e)
+	  errorMatrix.append(labelErrors)
+	## Find the label assignment that minimizes total error
+	minMatch = None
+	minError = -1
+	objList = range(max(len(expected), len(clusters)))
+	assn = itertools.permutations(objList, len(clusters))
+	for a in assn:
+	  e = 0
+	  i = 0
+	  newAssn = []
+	  for idx in a:
+	    if idx < len(expected):
+	      e += errorMatrix[idx][i]
+	      newAssn.append(idx)
+	    else:
+	      newAssn.append(-1)
+	    i += 1
+	  if minMatch is None or e < minError:
+	    minMatch = newAssn
+	    minError = e
+	#print "best: " + str(minMatch) + " with error " + str(minError)
+
+	## Convert the best assignment back to a list of labels
+	match = []
+	ordered = []
+	for i in range(len(minMatch)):
+	  if minMatch[i] is -1:
+	    match.append(None)
+	    ordered.append(None)
+	  else:
+	    #print str(errorMatrix[minMatch[i]][i]) + " + "
+	    match.append(clusters[i])
+	    ordered.append(labels[minMatch[i]])
+    	return match, ordered, minError
 
 class ui:
     def __init__(self):
 	self.master = Tk()
 	self.canvas = Canvas(self.master,width=800,height=500)
 	self.canvas.pack()
+	self.timeout = 5
+	self.waitCount = 0
 
     def startDrawing(self,labeling):
 	self.drawClusters(labeling.tracked,labeling.ids)
@@ -163,7 +172,6 @@ class ui:
 
     def drawClusters(self,clusters,ids):
 	if clusters is None or ids is None:
-	    print "Waiting for object messages..."
 	    time.sleep(1.0)
 	    return
 	self.canvas.delete("all")
@@ -181,7 +189,7 @@ class ui:
 		rot.append((-r.imag + 0.5) * 500)
  	    rgb = '#%02x%02x%02x' % (c.rgba_color.r,c.rgba_color.g,c.rgba_color.b)
 	    poly = self.canvas.create_polygon(rot,outline=rgb,fill='white',width=5)
-	    label = self.canvas.create_text((-c.points_centroid.x+0.5)*500, (-c.points_centroid.y + 0.5)*500,text=str(ids[idx].data),font="Verdana 10 bold")
+	    label = self.canvas.create_text((-c.points_centroid.x+0.5)*500, (-c.points_centroid.y + 0.5)*500,text=str(ids[idx]),font="Verdana 10 bold")
 	    self.canvas.pack()
 
 def main(args):

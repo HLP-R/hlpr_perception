@@ -170,7 +170,7 @@ main (int argc, char **argv)
   }
 
  // float workSpace[] = {-0.3,0.4,-0.25,0.35,0.3,2.0};
-  float workSpace[] = {-0.55,0.5,-0.4,0.3,0.3,2.0};
+  float workSpace[] = {-0.55,0.5,-0.2,0.45,0.3,2.0};
   multi_plane_app.setWorkingVolumeThresholds(workSpace);
 
   //if(pA.output_type == comType::cROS)
