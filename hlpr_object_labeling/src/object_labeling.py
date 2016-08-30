@@ -2,7 +2,7 @@
 
 import os
 import sys, time, math, cmath
-from std_msgs.msg import String
+from std_msgs.msg import String, Header
 import numpy as np
 import cv2
 import roslib
@@ -31,7 +31,7 @@ def get_param(name, value=None):
 class filter:
     def __init__(self):
         self.subscriber = rospy.Subscriber("/beliefs/features", PcFeatureArray, self.cbClusters, queue_size = 1)
-	self.orderPub = rospy.Publisher("/beliefs/labels", LabeledObjects)
+	self.orderPub = rospy.Publisher("/beliefs/labels", LabeledObjects, queue_size = 1)
         self.labeled = None
         self.tracked = None
 	self.errors = None
@@ -67,7 +67,9 @@ class filter:
 	    return
 	outMsg = LabeledObjects()
 	msgTime = rospy.Time.now()
-	outMsg.header.stamp = msgTime
+	head = Header()
+	head.stamp = msgTime
+	outMsg.header = head
 	outMsg.objects = self.tracked
 	outMsg.labels = self.ids
 	self.orderPub.publish(outMsg)
@@ -149,13 +151,16 @@ class filter:
 	match = []
 	ordered = []
 	for i in range(len(minMatch)):
-	  if minMatch[i] is -1:
-	    match.append(None)
-	    ordered.append(None)
-	  else:
+	  #if minMatch[i] is -1:
+	  #  match.append(None)
+	  #  ordered.append(None)
+	  #else:
+	  if minMatch[i] is not -1:
 	    #print str(errorMatrix[minMatch[i]][i]) + " + "
 	    match.append(clusters[i])
-	    ordered.append(labels[minMatch[i]])
+	    sMsg = String()
+	    sMsg.data = labels[minMatch[i]]
+	    ordered.append(sMsg)
     	return match, ordered, minError
 
 class ui:
@@ -189,7 +194,7 @@ class ui:
 		rot.append((-r.imag + 0.5) * 500)
  	    rgb = '#%02x%02x%02x' % (c.rgba_color.r,c.rgba_color.g,c.rgba_color.b)
 	    poly = self.canvas.create_polygon(rot,outline=rgb,fill='white',width=5)
-	    label = self.canvas.create_text((-c.points_centroid.x+0.5)*500, (-c.points_centroid.y + 0.5)*500,text=str(ids[idx]),font="Verdana 10 bold")
+	    label = self.canvas.create_text((-c.points_centroid.x+0.5)*500, (-c.points_centroid.y + 0.5)*500,text=str(ids[idx].data),font="Verdana 10 bold")
 	    self.canvas.pack()
 
 def main(args):
@@ -207,3 +212,4 @@ if __name__ == '__main__':
     rospy.loginfo("Initializing the object labeling node")
 
     main(sys.argv)
+    rospy.spin()
