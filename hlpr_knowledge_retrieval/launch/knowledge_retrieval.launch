@@ -1,0 +1,8 @@
+<launch>
+
+  <node name="hlpr_knowledge_retrieval" pkg="hlpr_knowledge_retrieval" type="object_knowledge_retrieval.py" respawn="false" output="screen">
+        <!-- Location of object description file (REQUIRED) -->
+        <param name="data_file_location" value="~/vector_ws/src/transfer/data/cups_knowledge.txt" type="string"/>
+  </node>
+</launch>
+
