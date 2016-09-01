@@ -80,7 +80,7 @@ class filter:
   	  t = transforms[idx]
 	  tl = (t.translation.x, t.translation.y, t.translation.z)
 	  r = (t.rotation.x, t.rotation.y, t.rotation.z, t.rotation.w)
-	  self.br.sendTransform(tl, r, msgTime, l, 'kinect_ir_optical_frame')
+	  self.br.sendTransform(tl, r, msgTime, l.data, 'kinect_ir_optical_frame')
 	  idx += 1
 
     def loadObjects(self):
