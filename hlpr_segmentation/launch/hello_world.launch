@@ -1,0 +1,17 @@
+<!-- Starts up everything needed to run the example listener/talker nodes. -->
+<launch>
+  <arg name="segmentation/nv" default="true" />
+  <arg name="segmentation/rt" default="/kinect/depth_registered/points" />
+  <arg name="segmentation/v" default="340" />
+  <arg name="segmentation/src" default="0" />
+
+  <node pkg="hlpr_segmentation" type="pc_seg" name="pc_seg" output="screen">
+    <param name="segmentation/nv" value="$(arg segmentation/nv)" />
+    <param name="segmentation/rt" value="$(arg segmentation/rt)" />
+    <param name="segmentation/src" value="$(arg segmentation/src)" />
+    <param name="segmentation/v" value="$(arg segmentation/v)" />
+  </node>
+  <node pkg="hlpr_feature_extraction" type="ft_ex" name="ft_ex" output="screen">
+    <param name="feature_extraction/rt" value="$(arg segmentation/rt)" />
+  </node>
+</launch>

@@ -1,0 +1,19 @@
+<package format="2">
+  <name>hlpr_feature_extraction</name>
+  <version>0.0.1</version>
+  <description>Feature Extraction</description>
+  <maintainer email="tesca.fitzgerald@cc.gatech.edu">Tesca Fitzgerald</maintainer>
+  <license>TBD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+
+  <!-- depend>dynamic_reconfigure</depend -->
+  <depend>roscpp</depend>
+  <depend>tf2_ros</depend>
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>hlpr_segmentation</depend>
+</package>

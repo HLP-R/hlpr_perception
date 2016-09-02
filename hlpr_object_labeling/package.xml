@@ -1,0 +1,18 @@
+<package format="2">
+  <name>hlpr_object_labeling</name>
+  <version>0.0.1</version>
+  <description>Object labeling</description>
+  <maintainer email="tesca.fitzgerald@cc.gatech.edu">Tesca Fitzgerald</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>hlpr_feature_extraction</depend>
+</package>
+

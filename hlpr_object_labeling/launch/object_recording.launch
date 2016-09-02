@@ -1,0 +1,12 @@
+<launch>
+
+  <node name="hlpr_object_recording" pkg="hlpr_object_labeling" type="object_recording.py" respawn="true" output="screen">
+        <!-- Location of object description file (REQUIRED) -->
+        <param name="feature_file_location" value="tracked_object_data.txt" type="string"/>
+
+        <!-- Minimum size for object recording (in square meters) -->
+        <param name="min_object_size" value="0.001"/>
+
+  </node>
+</launch>
+
