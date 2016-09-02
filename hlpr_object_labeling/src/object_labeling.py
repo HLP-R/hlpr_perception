@@ -30,8 +30,6 @@ def get_param(name, value=None):
 
 class filter:
     def __init__(self):
-        self.subscriber = rospy.Subscriber("/beliefs/features", PcFeatureArray, self.cbClusters, queue_size = 1)
-	self.orderPub = rospy.Publisher("/beliefs/labels", LabeledObjects, queue_size = 1)
         self.labeled = None
         self.tracked = None
 	self.errors = None
@@ -44,12 +42,33 @@ class filter:
 	self.satW = get_param("hsv_sat_weight",1)
 	self.valW = get_param("hsv_val_weight",1)
 	self.sizeW = get_param("size_weight",50000)
-	self.errorThreshold = get_param("error_threshold",200)
-    	self.filename = os.path.expanduser(get_param("feature_file_location"))
+        fileref = get_param("feature_file_location")
+	if fileref is not None:
+    	  self.filename = os.path.expanduser(fileref)
+	else:
+	  self.filename = None
+	topicref = get_param("feature_file_rostopic")
+	if topicref is not None:
+    	  self.rostopic = os.path.expanduser(topicref)
+          self.fileSub = rospy.Subscriber(self.rostopic, String, self.cbFile, queue_size = 1)
+        self.subscriber = rospy.Subscriber("/beliefs/features", PcFeatureArray, self.cbClusters, queue_size = 1)
+	self.orderPub = rospy.Publisher("/beliefs/labels", LabeledObjects, queue_size = 1)
+
+    def cbFile(self, ros_data):
+	if self.filename is not ros_data.data:
+	  self.filename = ros_data.data
+	  self.loadObjects()
+	  self.initialized = True
+          print "Reading object features from " + self.filename
 
     def cbClusters(self, ros_data):
+	#Wait for filename to be received (if receiving from rostopic)
+	if self.filename is None:
+	  return
+
 	#Initialize object feature values
         if self.initialized is False:
+          print "Reading object features from " + filename
 	  self.loadObjects()
 	  self.initialized = True
 
@@ -199,8 +218,6 @@ class ui:
 
 def main(args):
     global pf, display
-    filename = get_param("feature_file_location")
-    print "Reading object features from " + filename
 
     pf = filter()
     display = ui()

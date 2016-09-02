@@ -1,8 +1,26 @@
 <launch>
+  <node name="hlpr_object_labeling" pkg="hlpr_object_labeling" type="object_labeling.py" respawn="false" output="screen">
+        <!-- Uncomment to manually provide location of static object description file -->
+        <!--param name="feature_file_location" value="tracked_object_data.txt" type="string"/-->
+
+        <!-- Uncomment to provide name of rostopic which dynamically publishes object description filename -->
+        <param name="feature_file_rostopic" value="object_tracking_file" type="string"/>
+
+        <!-- Hue, saturation, value, and size feature weights -->
+        <param name="hsv_hue_weight" value="2"/>
+        <param name="hsv_sat_weight" value="1"/>
+        <param name="hsv_val_weight" value="1"/>
+        <param name="size_weight" value="50000"/>
+
+  </node>
 
   <node name="hlpr_knowledge_retrieval" pkg="hlpr_knowledge_retrieval" type="object_knowledge_retrieval.py" respawn="false" output="screen">
-        <!-- Location of object description file (REQUIRED) -->
-        <param name="data_file_location" value="~/vector_ws/src/transfer/data/cups_knowledge.txt" type="string"/>
+        <!-- Uncomment to manually provide location of static object description file -->
+        <!--param name="data_file_location" value="object_knowledge.txt" type="string"/-->
+
+        <!-- Uncomment to provide name of rostopic which dynamically publishes object description filename -->
+        <param name="data_file_rostopic" value="object_knowledge_file" type="string"/>
+
   </node>
 </launch>
 

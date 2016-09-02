@@ -23,9 +23,23 @@ class lookup:
     def __init__(self):
         self.subscriber = rospy.Subscriber("/beliefs/labels", LabeledObjects, self.cbLabels, queue_size = 1)
 	self.knowPub = rospy.Publisher("/beliefs/knowledge", ObjectKnowledge)
-        self.filename = os.path.expanduser(get_param("data_file_location"))
-        print "reading from " + self.filename
-	self.readObjectKnowledge(self.filename)
+
+        fileref = get_param("data_file_location")
+        if fileref is not None:
+          self.filename = os.path.expanduser(fileref)
+        else:
+          self.filename = None
+        topicref = get_param("data_file_rostopic")
+        if topicref is not None:
+          self.rostopic = os.path.expanduser(topicref)
+          self.fileSub = rospy.Subscriber(self.rostopic, String, self.cbFile, queue_size = 1)
+
+    def cbFile(self, ros_data):
+        if self.filename is not ros_data.data:
+          self.filename = ros_data.data
+	  self.readObjectKnowledge(self.filename)
+          self.initialized = True
+          print "Reading knowledge data from " + self.filename
 
     def readObjectKnowledge(self, filename):
       lines = None
@@ -46,7 +60,7 @@ class lookup:
 
     def cbLabels(self, ros_data):
 	labels = ros_data.labels
-	if labels is None:
+	if labels is None or self.filename is None:
 	    return
 	
 	messages = []
