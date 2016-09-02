@@ -83,7 +83,7 @@ before_install:
   - cd .. && mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/freenect2 && make && make install
   - sudo ln -sf ~/freenect2/lib/cmake/freenect2/freenect2Config.cmake /usr/share/cmake-3.2/Modules/Findfreenect2.cmake
   # Specific to PCL
-  - sudo add-apt-repository ppa:v-launchpad-jochen-sprickerhof-de/pcl
+  - sudo add-apt-repository ppa:v-launchpad-jochen-sprickerhof-de/pcl -y
   - sudo apt-get update -q
   - sudo apt-get install -y libpcl-all 
   #- sudo apt-get install -y libeigen3-dev
