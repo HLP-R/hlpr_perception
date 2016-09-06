@@ -36,6 +36,7 @@ class filter:
         self.ids = None
 	self.labels = None
 	self.initialized = False
+	self.run = True
 	self.br = tf.TransformBroadcaster()
 
 	self.hueW = get_param("hsv_hue_weight", 2)
@@ -52,6 +53,7 @@ class filter:
     	  self.rostopic = os.path.expanduser(topicref)
           self.fileSub = rospy.Subscriber(self.rostopic, String, self.cbFile, queue_size = 1)
         self.subscriber = rospy.Subscriber("/beliefs/features", PcFeatureArray, self.cbClusters, queue_size = 1)
+	self.pauseSub = rospy.Subscriber("/pause_labeling", String, self.cbPause, queue_size = 1)
 	self.orderPub = rospy.Publisher("/beliefs/labels", LabeledObjects, queue_size = 1)
 
     def cbFile(self, ros_data):
@@ -61,9 +63,19 @@ class filter:
 	  self.initialized = True
           print "Reading object features from " + self.filename
 
+    def cbPause(self, ros_data):
+	if ros_data.data == "pause":
+	  self.run = False
+	if ros_data.data == "play":
+	  self.run = True
+
     def cbClusters(self, ros_data):
 	#Wait for filename to be received (if receiving from rostopic)
 	if self.filename is None:
+	  return
+
+ 	if self.run is False:
+	  self.pubMessages()
 	  return
 
 	#Initialize object feature values
@@ -75,7 +87,7 @@ class filter:
 	#Read cluster message
 	clusterArr = ros_data
         clusters = ros_data.objects
-        transforms = ros_data.transforms
+        self.transforms = ros_data.transforms
 
 	#Classify clusters
 	#self.labeled, self.tracked, self.errors, self.ids = self.run_filter(self.initX, self.labels, clusters)
@@ -84,22 +96,29 @@ class filter:
 	#Publish labels
 	if len(clusters) is 0 or self.tracked is None:
 	    return
-	outMsg = LabeledObjects()
+	self.outMsg = LabeledObjects()
 	msgTime = rospy.Time.now()
 	head = Header()
 	head.stamp = msgTime
-	outMsg.header = head
-	outMsg.objects = self.tracked
-	outMsg.labels = self.ids
-	self.orderPub.publish(outMsg)
+	self.outMsg.header = head
+	self.outMsg.objects = self.tracked
+	self.outMsg.labels = self.ids
+	self.pubMessages()
+
+    def pubMessages(self):
+	if self.outMsg is None or self.transforms is None or self.ids is None:
+	  return
+
+	#Publish labels
+	self.orderPub.publish(self.outMsg)
 
 	#Publish transforms
 	idx = 0
         for l in self.ids:
-  	  t = transforms[idx]
+  	  t = self.transforms[idx]
 	  tl = (t.translation.x, t.translation.y, t.translation.z)
 	  r = (t.rotation.x, t.rotation.y, t.rotation.z, t.rotation.w)
-	  self.br.sendTransform(tl, r, msgTime, l.data, 'kinect_ir_optical_frame')
+	  self.br.sendTransform(tl, r, self.outMsg.header.stamp, l.data, 'kinect_ir_optical_frame')
 	  idx += 1
 
     def loadObjects(self):
