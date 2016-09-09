@@ -2,11 +2,15 @@
   <arg name="segmentation/nv" default="true" />
   <arg name="segmentation/rt" default="/kinect/sd/points" />
   <arg name="segmentation/src" default="0" />
+  <arg name="segmentation/c" default="0" />
+  <arg name="segmentation/ct" default="100000000" />
 
-  <node pkg="hlpr_segmentation" type="pc_seg" name="pc_seg">
+  <node pkg="hlpr_segmentation" type="pc_seg" name="pc_seg" >
     <param name="segmentation/nv" value="$(arg segmentation/nv)" />
     <param name="segmentation/rt" value="$(arg segmentation/rt)" />
     <param name="segmentation/src" value="$(arg segmentation/src)" />
+    <param name="segmentation/c" value="$(arg segmentation/c)" />
+    <param name="segmentation/ct" value="$(arg segmentation/ct)" />
   </node>
 
   <arg name="feature_extraction/nv" default="true" />
