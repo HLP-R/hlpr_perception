@@ -1,5 +1,0 @@
-# Features for a single cluster
-
-Header header
-ObjectFeatures[] objects
-geometry_msgs/Transform[] transforms
