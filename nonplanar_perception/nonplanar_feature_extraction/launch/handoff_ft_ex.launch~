@@ -1,8 +1,0 @@
-<!-- Starts up everything needed to run the example listener/talker nodes. -->
-<launch>
-  <!-- arg name="segmentation/viz" default="true" / -->
-
-  <node pkg="nonplanar_feature_extraction" type="nonplanar_ft_ex" name="handoff_ft_ex" output="screen">
-    <!-- param name="segmentation/viz" value="$(arg segmentation/viz)" / -->
-  </node>
-</launch>
