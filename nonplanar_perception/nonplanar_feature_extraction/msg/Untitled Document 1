@@ -1,0 +1,64 @@
+1) -SAN is used for: 1) Performing appropriate object substitution 
+  2) Locate missing objects in the robot's environment
+
+  - represented using Bayesian Logic Network. It is created by combining ConceptNet and WordNet ( MISSING: Images or some relation to visual aspect) 
+
+  - Is able to predict object categories, locations, properties and affordances in 3 different household scenarios (Need to expand it to more scenarios)
+
+  - CONTAINS: information relevant to the current context! Must have some sort of flag for objects or scenes so that they are known to be active. This is to make sure that the size of the network remains small but it still has inactive knowledge from past explorations. 
+
+  --> Currently you give it seed words pertaining to the location that the robot is in. Here, we should use vision to get them instead.
+
+  --> Disambuigation of the seed words: (If that is wrong, the error propogates and then accuracy decreases) Also have to address the part as to which sense gets added to the BLN. The paper says that only the correct sense gets added to the BLN but how is this acheived? How do you make absolutely sure that the sense we are adding is the right one.
+
+  --> Weight learning for each of the relations should be learnt via the robot
+
+2) Examples for grounding SAN from a robot's perspective:
+  Aspects that need to be grounded with respect to the robot -> Currently the seed words are given by a human (I am assuming here, the paper is not very clear on that) with respect to the location it is in. Say a robot is in the kitchen, then the seed words would be object in the kitchen i.e. pan, spoon, skillet, etc.     
+  However, we would want to change it so that the robot extracts the seed words from the scene it is currently looking at. This can be done by segmenting the visual feed that the robot is looking at currently and either do 3D mapping (can map to 3D models found in ShapeNet) or 2D mapping (using ImageNet). Then use the mapping between the images and words to get a seed word dictionary to be used in SAN. 
+
+  Extending SAN to form a semantic map - The advantage of incorporating such visual component in SAN is that we can extend it to create a semantic map which can be thought of as a 3D map where objects and people serve as dynamic obstacles and tables/boards and other furniture become static objects (over a period of time). The robot will classify them as static objects if they remain in the same position over multiple runs of the same environment and dynamic if they move around. The robot will give a probablistic categorization of each obstacle. This will act as an extra layer over the normal 2D map. Most of the papers that I checked out usually do 3D segmentation for semantic maps. However, none of them do any sort of mapping to ShapeNet or something so they are not really grounding the point clouds to anything. in this way, our project will be more unique.
+
+  http://www.willowgarage.com/sites/default/files/iros.pdf ---> This does something similar to what we want to do. However again the object or planes are not grounded and its said to query to their database would be "show me small, curved, white objects in the cafeteria" (a good substitute for "coffee cups")" and we want to ground coffee cups in our robot's knowledge base. They dont perform any sort of object detection, just semantic querying and change detection.
+
+  Future high-level task examples:
+  1) Semantic map: The robot maps GDC and figures out if more stationary is required or if coffee cups have run out. Using SAN, it should be able to discover that cabinets and drawers have the same affordance and check all possible storing locations before making a conclusion that the coffee cups are out of stock. The map will also help as each object will have a tag of its semantic location and the robot can look for coffee cups accordingly. This is some sort of change detection using SAN but it needs to understand what "coffee cups" stands for and where to usually find them. 
+
+  2) Figuring out its location based on the visual feed - This is an experiment to be done after we have a SAN. Instead of providing the robot with its current location, the robot should be able to figure that out on its own by segmenting its visual feed, mapping the objects and planes to SAN and based on SAN and the semantic map, figuring out its location i.e. kitchen, living area, etc. 
+
+  3) Object substitution (find those with the same affordance) in order to complete a task - Say the task is to transfer pasta from a pasta box to a bowl. A bowl is nowhere to be found, so it should be able to find an object to replace the bowl, say a cup/mug/plate and still carry out the task. For this purposes again, the robot needs to have some sort of mapping between object labels and object images/3D models.
+    
+3) Implementation details: 
+  Some of the things that need to be taken into consideration for future implementation:
+  1) Do we still want to keep the current representation of SAN that Hailey has in place or are some changes required? This should be decided after taking into consideration the following factors: 
+  a) Should SAN be used a base for the 3D semantic map or is SAN a standalone component? 
+  If they are combined, it would look like something as follows:
+    Segmented          map pointclouds        build a      build a 3D       Human 
+    visual feed  --->  to 3D models and  --->   SAN   ---> semantic map --> labelling 
+    from the robot     get object labels     (situated     (permanent)      for different
+                                                  &                         areas of the
+                                             temporary)                     map i.e. kitchen, 
+                                                                            office, living room
+      Combining SAN and the map in such a way and using them over multiple runs will help us figure which are static and dynamic components - what needs to go into short term memory (people, objects which dont have a fixed place) and what into long-term memory (static objects and attributes, tables and furniture). Also storing this information in form of a map will ground the idea of locations in the robot (it will now know what a kitchen should look like), so that it is able to figure out in which scenario it is currently placed.
+
+  b) How to connect the 3D map to SAN?  
+     Connection between SAN and the 3D semantic map is established by having active and inactive nodes. Whatever the robot is currently able to see will be categorized as active nodes. We also need a quick way to map the current SAN (obtained from the scene the robot is looking at) to the semantic map in order for the robot to decipher its location. 
+
+  c) How to store the 3D Map? Is is also some form of a hierarchical structure? But it needs to be efficient as it will grow exponentially over a short period of time. How do we decide which information to be categorized as dynamic and static? Which information needs to be stored when the robot looks away from a scene and which can be recomputed each time?
+
+  2) How to connect real data to abstract data? 
+   
+
+Outline given by Andrea
+1) Sonia’s group gives us an abstract SAN, that may also be only partially complete
+— more about what exactly this is
+
+2) research questions == how to ground each aspect of this into robot specific, env specific data
+— examples == objects, sem locations, etc.
+
+3) Implementation detail questions as we get started
+— do we want to just add things to the representation they have
+— how do we connect real data to abstract data
+— what do we want to do about more dynamic information (short term memory) versus static info about objects and attributes
+
+

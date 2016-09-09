@@ -1,0 +1,8 @@
+<!-- Starts up everything needed to run the example listener/talker nodes. -->
+<launch>
+  <arg name="nonplanar_segmentation/viz" default="false" />
+
+  <node pkg="nonplanar_segmentation" type="nonplanar_seg" name="nonplanar_seg" output="screen">
+    <param name="nonplanar_segmentation/viz" value="$(arg nonplanar_segmentation/viz)" />
+  </node>
+</launch>

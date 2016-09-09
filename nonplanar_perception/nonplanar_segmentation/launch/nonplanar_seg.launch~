@@ -1,0 +1,14 @@
+<!-- Starts up everything needed to run the example listener/talker nodes. -->
+<launch>
+  <arg name="nonplanar_segmentation/nv" default="false" />
+  <arg name="nonplanar_segmentation/rt" default="/kinect/depth_registered/points" />
+  <!--<arg name="nonplanar_segmentation/v" default="340" /> -->
+  <arg name="nonplanar_segmentation/src" default="2" />          <!-- Make it 2 for Kinect -->
+
+  <node pkg="nonplanar_segmentation" type="nonplanarseg" name="nonplanar_seg" output="screen">
+    <param name="nonplanar_segmentation/nv" value="$(arg nonplanar_segmentation/nv)" />
+    <param name="nonplanar_segmentation/rt" value="$(arg nonplanar_segmentation/rt)" />
+    <param name="nonplanar_segmentation/src" value="$(arg nonplanar_segmentation/src)" />
+    <!--<param name="nonplanar_segmentation/v" value="$(arg nonplanar_segmentation/v)" /> -->
+  </node>
+</launch>
