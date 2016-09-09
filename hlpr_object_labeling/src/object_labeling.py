@@ -110,6 +110,10 @@ class filter:
 	  return
 
 	#Publish labels
+	msgTime = rospy.Time.now()
+	head = Header()
+	head.stamp = msgTime
+	self.outMsg.header = head
 	self.orderPub.publish(self.outMsg)
 
 	#Publish transforms
