@@ -2,59 +2,19 @@
 
 Header header
 
-# Object transform, however calculated
 geometry_msgs/Transform transform
 
+RawPtCldInfo rawInfo
+OrientedBoundingBox obb
 
-#################################
-# Raw point Related
+bool setColorHist            # Flag to state if hs_hist was computed and set
+ColorHist hs_hist
 
-# Cluster centroid, min, max and number of points
-geometry_msgs/Vector3 points_centroid
-geometry_msgs/Vector3 points_min   #<pc min x, pc min y, pc min z>
-geometry_msgs/Vector3 points_max   #<pc max x, pc max y, pc max z>
-float64 num_points
+bool setShapeHist            # Flag to state if shape_hist was computed and set
+ShapeHist shape_hist
 
-# Average color (RGBA nad hue)
-std_msgs/ColorRGBA rgba_color
-float64 hue
+bool setViewpointHist        # Flag to state if view_hist was computed and set
+ViewpointHist view_hist
 
-#################################
-#Oriented Bounding box
-
-#position wrt sensor 
-geometry_msgs/Vector3 bb_center
-
-# Bounding box dimensions
-geometry_msgs/Vector3 bb_dims
-
-#################################
-# Hue-Saturation histogram
-
-uint32 hs_features_size
-float64[] hs_feature_vector
-
-#################################
-# VFH features
-
-uint32 vfh_features_size
-float64[] vfh_feature_vector
-
-#################################
-# Shape histogram using CVFH
-
-uint32 cvfh_features_size
-float64[] cvfh_feature_vector
-
-#################################
-# Shape histogram using FPFH
-
-uint32 fpfh_features_size
-float64[] fpfh_feature_vector
-
-#################################
-
-#Other features, etc. Unpacking will be on the other side
-
-uint32 other_features_size
-float64[] data
+bool setOtherFeatures        # Flag to state if other features were computed and set
+OtherFeatures other

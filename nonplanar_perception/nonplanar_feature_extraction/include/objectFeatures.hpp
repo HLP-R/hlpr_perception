@@ -28,7 +28,6 @@
 
 //use eigen data structures?
 
-
 class pc_cluster_features
 {
 private:
@@ -90,6 +89,7 @@ private:
       std::cout<<"zSize : "<<oriented_bounding_box.size.zSize<<std::endl;
    } 
 
+  // Added by Priyanka - for planes
   void planeConst(pcl::PointCloud<PointT> &contour)
   {
      plane_cloud = contour.makeShared();
@@ -107,7 +107,6 @@ private:
      r /= n; g /= n; b /= n;
 
      hue = rgb2hue(r,g,b);
-
 
      //std::cout << rgb2hue(r,g,b) << endl;
 
@@ -240,7 +239,11 @@ public:
   pcl::PointCloud<PointT>::Ptr parent_cloud;
   pcl::PointIndices indices; //indices in the parent point cloud
   pcl::PointCloud<pcl::Normal> normals;
+  
+  bool setViewpointHist = true;                // boolean to check if viewpoint Histogram is being computed and set (Default - true)
   pcl::PointCloud<pcl::VFHSignature308> vfhs;// (new pcl::PointCloud<pcl::VFHSignature308> ());
+  
+  bool setShapeHist = true;                   // boolean to check if shape histogram is being computed and set (Default - true)
   pcl::PointCloud<pcl::VFHSignature308> cvfhs; // (new pcl::PointCloud<pcl::VFHSignature308> ());
   pcl::PointCloud<pcl::FPFHSignature33> fpfhs; //(new pcl::PointCloud<pcl::FPFHSignature33> ());
   
@@ -251,7 +254,12 @@ public:
   //std::vector<double> histogram_fpfh_vector (308); 
   
   // Normalized hue-saturation histogram
+  bool setColorHist = true;              // boolean to check if color Histogram is being computed and set (Default - true)
   std::vector<double> histogram_hs;
+
+  // Other features (default is set to false)
+  bool setOtherFeatures = false;
+  std::vector<double> otherFeatures;               // Vector to store the other features
   
   //Image based features??? blob features, color histogram? using opencv
 

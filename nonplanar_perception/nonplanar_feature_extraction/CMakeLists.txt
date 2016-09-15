@@ -16,13 +16,19 @@ set(ROS_LIBRARIES /opt/ros/${ROS_DISTRO}/lib/libroscpp.so
         /opt/ros/${ROS_DISTRO}/lib/libtf2_ros.so)
 
 #find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure message_generation roscpp std_msgs geometry_msgs)
-find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs geometry_msgs tf2_ros)
+find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs geometry_msgs tf2_ros nonplanar_segmentation)
 find_package(PCL 1.8 REQUIRED COMPONENTS)
 find_package(freenect2 REQUIRED)
 find_package(OpenCV REQUIRED)
 
 add_message_files(
   FILES
+  RawPtCldInfo.msg
+  ShapeHist.msg
+  ColorHist.msg
+  OrientedBoundingBox.msg
+  OtherFeatures.msg
+  ViewpointHist.msg
   ObjectFeatures.msg
   PlaneFeatures.msg
   ExtractedFeaturesArray.msg
@@ -32,6 +38,7 @@ generate_messages(
   DEPENDENCIES
   std_msgs
   geometry_msgs
+  nonplanar_segmentation
 )
 
 #generate_dynamic_reconfigure_options(
@@ -58,7 +65,7 @@ add_executable(nonplanar_ft_ex src/feature_extraction.cpp)
 #add_executable(listener src/listener.cpp src/nodes/listener_node.cpp)
 #target_link_libraries(pc_seg ${catkin_LIBRARIES} ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries(nonplanar_ft_ex ${PCL_LIBRARIES} nonplanarftex ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
-add_dependencies(nonplanar_ft_ex segmentation_generate_messages_cpp)
+add_dependencies(nonplanar_ft_ex nonplanar_feature_extraction_generate_messages_cpp)
 
 
 #install(DIRECTORY include/${PROJECT_NAME}/

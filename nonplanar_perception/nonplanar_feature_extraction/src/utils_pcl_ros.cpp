@@ -1,10 +1,3 @@
-/*
- * utils_pcl_ros.cpp
- *
- *  Created on: Sep 9, 2014
- *      Author: baris
- */
-
 #include<utils_pcl_ros.hpp>
 
 
@@ -44,103 +37,186 @@ Cube_2_Arrows(pcl::ModelCoefficients &cube, boost::shared_ptr<pcl::visualization
   viewer->addLine(p2c, base, 0.0, 0.0, 255.0, name);
 }
 
-void
-fillRosMessage (nonplanar_feature_extraction::ObjectFeatures &outRosMsg, const pc_cluster_features &inObjFeatures)
+void 
+fillRawPtCldInfoMsg (nonplanar_feature_extraction::RawPtCldInfo &rawInfo, const pc_cluster_features &inObjFeatures, bool setNumPoints)
 {
-  outRosMsg.header.stamp = ros::Time::now();
+  rawInfo.points_centroid.x = inObjFeatures.centroid[0];
+  rawInfo.points_centroid.y = inObjFeatures.centroid[1];
+  rawInfo.points_centroid.z = inObjFeatures.centroid[2];
 
-  outRosMsg.transform.translation.x = inObjFeatures.oriented_bounding_box.center.x;
-  outRosMsg.transform.translation.y = inObjFeatures.oriented_bounding_box.center.y;
-  outRosMsg.transform.translation.z = inObjFeatures.oriented_bounding_box.center.z;
-  //make sure the quat order is correct!
-  outRosMsg.transform.rotation.x = inObjFeatures.oriented_bounding_box.rot_quat[0];
-  outRosMsg.transform.rotation.y = inObjFeatures.oriented_bounding_box.rot_quat[1];
-  outRosMsg.transform.rotation.z = inObjFeatures.oriented_bounding_box.rot_quat[2];
-  outRosMsg.transform.rotation.w = inObjFeatures.oriented_bounding_box.rot_quat[3];
+  rawInfo.points_min.x = inObjFeatures.min[0];
+  rawInfo.points_min.y = inObjFeatures.min[1];
+  rawInfo.points_min.z = inObjFeatures.min[2];
 
-  outRosMsg.points_centroid.x = inObjFeatures.centroid[0];
-  outRosMsg.points_centroid.y = inObjFeatures.centroid[1];
-  outRosMsg.points_centroid.z = inObjFeatures.centroid[2];
+  rawInfo.points_max.x = inObjFeatures.max[0];
+  rawInfo.points_max.y = inObjFeatures.max[1];
+  rawInfo.points_max.z = inObjFeatures.max[2];
 
-  outRosMsg.points_min.x = inObjFeatures.min[0];
-  outRosMsg.points_min.y = inObjFeatures.min[1];
-  outRosMsg.points_min.z = inObjFeatures.min[2];
+  if(setNumPoints == true)               // For objects, num_points is true
+  {        
+      rawInfo.setNumPoints = true;
+      rawInfo.num_points = (float) inObjFeatures.volume2; 
+  }
+  else
+  {
+     rawInfo.setNumPoints = false;
+     rawInfo.num_points = 0;
+  }
 
-  outRosMsg.points_max.x = inObjFeatures.max[0];
-  outRosMsg.points_max.y = inObjFeatures.max[1];
-  outRosMsg.points_max.z = inObjFeatures.max[2];
+  rawInfo.rgba_color.r = inObjFeatures.color[0]/255.;
+  rawInfo.rgba_color.g = inObjFeatures.color[1]/255.;
+  rawInfo.rgba_color.b = inObjFeatures.color[2]/255.;
+  rawInfo.rgba_color.a = 1.0;
+  rawInfo.hue = inObjFeatures.hue;
+} 
 
-  outRosMsg.num_points = (float) inObjFeatures.volume2;
+void 
+fillOrientedBoundingBoxMsg (nonplanar_feature_extraction::OrientedBoundingBox &obb, const pc_cluster_features &inObjFeatures)
+{
+  obb.bb_center.x = inObjFeatures.oriented_bounding_box.center.x;
+  obb.bb_center.y = inObjFeatures.oriented_bounding_box.center.y;
+  obb.bb_center.z = inObjFeatures.oriented_bounding_box.center.z;
 
-  outRosMsg.rgba_color.r = inObjFeatures.color[0]/255.;
-  outRosMsg.rgba_color.g = inObjFeatures.color[1]/255.;
-  outRosMsg.rgba_color.b = inObjFeatures.color[2]/255.;
-  outRosMsg.rgba_color.a = 1.0;
-  outRosMsg.hue = inObjFeatures.hue;
+  obb.bb_dims.x = inObjFeatures.oriented_bounding_box.size.xSize;
+  obb.bb_dims.y = inObjFeatures.oriented_bounding_box.size.ySize;
+  obb.bb_dims.z = inObjFeatures.oriented_bounding_box.size.zSize;
 
-  outRosMsg.bb_center.x = inObjFeatures.oriented_bounding_box.center.x;
-  outRosMsg.bb_center.y = inObjFeatures.oriented_bounding_box.center.y;
-  outRosMsg.bb_center.z = inObjFeatures.oriented_bounding_box.center.z;
-
-  //outRosMsg.bb_angle  = inObjFeatures.aligned_bounding_box.angle;
-  outRosMsg.bb_dims.x = inObjFeatures.oriented_bounding_box.size.xSize;
-  outRosMsg.bb_dims.y = inObjFeatures.oriented_bounding_box.size.ySize;
-  outRosMsg.bb_dims.z = inObjFeatures.oriented_bounding_box.size.zSize;
-  
-  outRosMsg.hs_features_size = 256;
-  for(int i = 0;i<outRosMsg.hs_features_size;i++)
-    outRosMsg.hs_feature_vector.push_back(inObjFeatures.histogram_hs[i]);
-    
-  outRosMsg.vfh_features_size = 308;
-  for(int i = 0;i<outRosMsg.vfh_features_size;i++)
-    outRosMsg.vfh_feature_vector.push_back(inObjFeatures.vfhs.points[0].histogram[i]);
-    
-  outRosMsg.cvfh_features_size = 308;
-  for(int i = 0;i<outRosMsg.cvfh_features_size;i++)
-    outRosMsg.cvfh_feature_vector.push_back(inObjFeatures.cvfhs.points[0].histogram[i]);
-    
-  outRosMsg.fpfh_features_size = 308;
-  for(int i = 0;i<outRosMsg.fpfh_features_size;i++)
-    outRosMsg.fpfh_feature_vector.push_back(inObjFeatures.fpfhs.points[0].histogram[i]);
-  
-  // CHANGE DIMENSIONS IF THERE ARE SOME OTHER NEW FEATURES
-  outRosMsg.other_features_size = 0;
-  for(int i = 0;i<outRosMsg.other_features_size;i++)
-    outRosMsg.data.push_back(0);
+  obb.bb_rot_quat.x = inObjFeatures.oriented_bounding_box.rot_quat[0];
+  obb.bb_rot_quat.y = inObjFeatures.oriented_bounding_box.rot_quat[1];
+  obb.bb_rot_quat.z = inObjFeatures.oriented_bounding_box.rot_quat[2];
+  obb.bb_rot_quat.w = inObjFeatures.oriented_bounding_box.rot_quat[3];
 }
 
-// Added by Priyanka for PlaneFeatures.msg
 void
-fillRosMessageForPlanes (nonplanar_feature_extraction::PlaneFeatures &outRosMsg, const pc_cluster_features &inObjFeatures)
+fillColorHistMsg(nonplanar_feature_extraction::ColorHist &hs, const pc_cluster_features &inObjFeatures)
 {
-  outRosMsg.header.stamp = ros::Time::now();
+  hs.hs_features_size = 256;
+  for(int i = 0;i<hs.hs_features_size;i++)
+    hs.hs_feature_vector.push_back(inObjFeatures.histogram_hs[i]);
+}
 
-  outRosMsg.points_centroid.x = inObjFeatures.centroid[0];
-  outRosMsg.points_centroid.y = inObjFeatures.centroid[1];
-  outRosMsg.points_centroid.z = inObjFeatures.centroid[2];
+void
+fillShapeHistMsg(nonplanar_feature_extraction::ShapeHist &sh, const pc_cluster_features &inObjFeatures)
+{
+  sh.cvfh_features_size = 308;
+  for(int i = 0;i<sh.cvfh_features_size;i++)
+    sh.cvfh_feature_vector.push_back(inObjFeatures.cvfhs.points[0].histogram[i]);
+    
+  sh.fpfh_features_size = 308;
+  for(int i = 0;i<sh.fpfh_features_size;i++)
+    sh.fpfh_feature_vector.push_back(inObjFeatures.fpfhs.points[0].histogram[i]);
+}
 
-  outRosMsg.points_min.x = inObjFeatures.min[0];
-  outRosMsg.points_min.y = inObjFeatures.min[1];
-  outRosMsg.points_min.z = inObjFeatures.min[2];
+void 
+fillViewpointHistMsg(nonplanar_feature_extraction::ViewpointHist &vph, const pc_cluster_features &inObjFeatures)
+{
+  vph.vfh_features_size = 308;
+  for(int i = 0;i<vph.vfh_features_size;i++)
+    vph.vfh_feature_vector.push_back(inObjFeatures.vfhs.points[0].histogram[i]);
+}
 
-  outRosMsg.points_max.x = inObjFeatures.max[0];
-  outRosMsg.points_max.y = inObjFeatures.max[1];
-  outRosMsg.points_max.z = inObjFeatures.max[2];
+void 
+fillOtherFeaturesMsg(nonplanar_feature_extraction::OtherFeatures &other, const pc_cluster_features &inObjFeatures)
+{
+  other.other_features_size = inObjFeatures.otherFeatures.size();
+  for(int i = 0;i<other.other_features_size;i++)
+    other.data.push_back(inObjFeatures.otherFeatures[i]);
+}
 
-  outRosMsg.rgba_color.r = inObjFeatures.color[0]/255.;
-  outRosMsg.rgba_color.g = inObjFeatures.color[1]/255.;
-  outRosMsg.rgba_color.b = inObjFeatures.color[2]/255.;
-  outRosMsg.rgba_color.a = 1.0;
-  outRosMsg.hue = inObjFeatures.hue;
+void 
+fillObjectFeaturesMsg (nonplanar_feature_extraction::ObjectFeatures &objRosMsg, 
+                   nonplanar_feature_extraction::RawPtCldInfo &rawInfo,
+                   nonplanar_feature_extraction::OrientedBoundingBox &obb,
+                   nonplanar_feature_extraction::ColorHist &hs,
+                   nonplanar_feature_extraction::ShapeHist &sh,
+                   nonplanar_feature_extraction::ViewpointHist &vph,
+                   nonplanar_feature_extraction::OtherFeatures &other,
+                   const pc_cluster_features &inObjFeatures)
+{
+    objRosMsg.header.stamp = ros::Time::now();
 
-  outRosMsg.bb_center.x = inObjFeatures.oriented_bounding_box.center.x;
-  outRosMsg.bb_center.y = inObjFeatures.oriented_bounding_box.center.y;
-  outRosMsg.bb_center.z = inObjFeatures.oriented_bounding_box.center.z;
+    objRosMsg.transform.translation.x = obb.bb_center.x;
+    objRosMsg.transform.translation.y = obb.bb_center.y;
+    objRosMsg.transform.translation.z = obb.bb_center.z;
 
-  //outRosMsg.bb_angle  = inObjFeatures.aligned_bounding_box.angle;
-  outRosMsg.bb_dims.x = inObjFeatures.oriented_bounding_box.size.xSize;
-  outRosMsg.bb_dims.y = inObjFeatures.oriented_bounding_box.size.ySize;
-  outRosMsg.bb_dims.z = inObjFeatures.oriented_bounding_box.size.zSize;
+    objRosMsg.transform.rotation.x = obb.bb_rot_quat.x;
+    objRosMsg.transform.rotation.y = obb.bb_rot_quat.y;
+    objRosMsg.transform.rotation.z = obb.bb_rot_quat.z;
+    objRosMsg.transform.rotation.w = obb.bb_rot_quat.w;
+
+    objRosMsg.rawInfo = rawInfo;
+    objRosMsg.obb = obb;
+   
+    objRosMsg.setColorHist = inObjFeatures.setColorHist;
+    objRosMsg.hs_hist = hs;
+
+    objRosMsg.setShapeHist = inObjFeatures.setShapeHist;
+    objRosMsg.shape_hist = sh;
+
+    objRosMsg.setViewpointHist = inObjFeatures.setViewpointHist;
+    objRosMsg.view_hist = vph;
+
+    objRosMsg.setOtherFeatures = inObjFeatures.setOtherFeatures;
+    objRosMsg.other = other; 
+}
+
+void
+fillPlaneFeaturesMsg(nonplanar_feature_extraction::PlaneFeatures &planeRosMsg, 
+                     nonplanar_feature_extraction::RawPtCldInfo &rawInfo,
+                     nonplanar_feature_extraction::OrientedBoundingBox &obb,
+                     const pc_cluster_features &inObjFeatures)
+{
+  planeRosMsg.header.stamp = ros::Time::now();
+
+  planeRosMsg.rawInfo = rawInfo;
+  planeRosMsg.obb = obb;
+}
+
+// Takes in all the features and then fills up the messages accordingly
+void
+fillRosMessageForObjects (nonplanar_feature_extraction::ObjectFeatures &objRosMsg, const pc_cluster_features &inObjFeatures)
+{
+  // Fill up the RawPtCldInfo.msg
+  nonplanar_feature_extraction::RawPtCldInfo rawInfo;
+  fillRawPtCldInfoMsg(rawInfo, inObjFeatures, true);
+
+  // Fill up the OrientedBoundingBox.msg
+  nonplanar_feature_extraction::OrientedBoundingBox obb;
+  fillOrientedBoundingBoxMsg(obb, inObjFeatures);
+  
+  // Fill up the ColorHist.msg
+  nonplanar_feature_extraction::ColorHist hs;
+  fillColorHistMsg(hs, inObjFeatures);
+
+  // Fill up the ShapeHist.msg
+  nonplanar_feature_extraction::ShapeHist sh;
+  fillShapeHistMsg(sh, inObjFeatures);
+
+  // Fill up the ViewpointHist.msg
+  nonplanar_feature_extraction::ViewpointHist vph;
+  fillViewpointHistMsg(vph, inObjFeatures);
+
+  // Fill up OtherFeatures.msg
+  nonplanar_feature_extraction::OtherFeatures other;
+  fillOtherFeaturesMsg(other, inObjFeatures);
+
+  // Fill out the top-level main msg for objects
+  fillObjectFeaturesMsg(objRosMsg, rawInfo, obb, hs, sh, vph, other, inObjFeatures);
+}
+
+void
+fillRosMessageForPlanes (nonplanar_feature_extraction::PlaneFeatures &planeRosMsg, const pc_cluster_features &inObjFeatures)
+{
+  // Fill up the RawPtCldInfo.msg
+  nonplanar_feature_extraction::RawPtCldInfo rawInfo;
+  fillRawPtCldInfoMsg(rawInfo, inObjFeatures, false);           // False flag sent as the volume for planes is not right
+ 
+  // Fill up the OrientedBoundingBox.msg
+  nonplanar_feature_extraction::OrientedBoundingBox obb;
+  fillOrientedBoundingBoxMsg(obb, inObjFeatures);
+
+  // Fill out the top-level main msg for planes
+  fillPlaneFeaturesMsg(planeRosMsg, rawInfo, obb, inObjFeatures);
 }
 
 void objectPoseTF(geometry_msgs::Transform geom_transform)
@@ -154,7 +230,6 @@ void objectPoseTF(geometry_msgs::Transform geom_transform)
   transformStamped.child_frame_id = "main_object";
   br.sendTransform(transformStamped);
 }
-
 
 template<class pcType>
 bool

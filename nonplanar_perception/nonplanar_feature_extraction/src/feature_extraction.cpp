@@ -213,7 +213,7 @@ main (int argc, char **argv)
 
     for(int i = 0; i < feats.size(); i++) {
       nonplanar_feature_extraction::ObjectFeatures ft;
-      fillRosMessage(ft, feats[i]);
+      fillRosMessageForObjects (ft, feats[i]);
       rosMsg.objects.push_back(ft); 
       rosMsg.transforms.push_back(ft.transform);
     }

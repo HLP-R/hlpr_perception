@@ -344,7 +344,7 @@ void OpenNIOrganizedMultiPlaneSegmentation::featureExtraction(
     fittedBoxes.push_back(feat.oriented_bounding_box);
     cluster_colors.push_back(feat.color);
 	
-	// VFH features
+	  // VFH features
     vfh.setInputCloud (cluster.makeShared());
     vfh.setInputNormals (normals[i].makeShared());
 
