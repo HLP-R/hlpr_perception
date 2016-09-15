@@ -3,5 +3,3 @@
 Header header
 RawPtCldInfo rawInfo
 OrientedBoundingBox obb
-
-

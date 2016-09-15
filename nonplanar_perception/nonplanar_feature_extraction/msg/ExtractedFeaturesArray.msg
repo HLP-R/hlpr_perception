@@ -2,5 +2,5 @@
 
 Header header
 ObjectFeatures[] objects
-PlaneFeatures[] planes
+PlaneFeatures[] planes 
 geometry_msgs/Transform[] transforms

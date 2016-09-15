@@ -13,6 +13,7 @@
 #include <pcl/PCLPointCloud2.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
+#include <nonplanar_feature_extraction/PlaneFeatures.h>
 #include <nonplanar_feature_extraction/ObjectFeatures.h>
 #include <nonplanar_feature_extraction/ExtractedFeaturesArray.h>
 #include <nonplanar_segmentation/NonPlanarSegClusters.h>
@@ -41,8 +42,6 @@ const char *normalRostopic = "/beliefs/normals";
 const char *planeRostopic = "/beliefs/plane";
 const char *outRostopic = "/beliefs/features";
 const char *transformRostopic = "/beliefs/tfs";
-
-//int counter = 0;
 
 void interruptFn(int sig) {
   interrupt = true;
@@ -76,22 +75,30 @@ cluster_cb (const nonplanar_segmentation::NonPlanarSegClusters& msg)
         normals.push_back(*pclCloud);                // get the normals here
     }
   
-    plane_coefficients.clear();
-    for(int j = 0; j<msg.plane_coefficients.size(); j++) {
-      std::vector<float>::const_iterator it = msg.plane_coefficients[j].data.begin();
-      Eigen::Vector4f plane;
-      for(int i = 0; i < 4; i++) {
-	      plane[i] = *it;
-	      ++it;
+    if(msg.ifPlanesUsed == true)
+    {
+      plane_coefficients.clear();
+      for(int j = 0; j<msg.plane_coefficients.size(); j++) {
+        std::vector<float>::const_iterator it = msg.plane_coefficients[j].data.begin();
+        Eigen::Vector4f plane;
+        for(int i = 0; i < 4; i++) {
+	        plane[i] = *it;
+	        ++it;
+        }
+        plane_coefficients.push_back(plane);           // get the plane coefficients here
       }
-      plane_coefficients.push_back(plane);           // get the plane coefficients here
-    }
 
-    contours.clear();
-    for(int i = 0; i < msg.plane_contours.size(); i++) {
-        pcl::PointCloud<PointT>::Ptr contour (new pcl::PointCloud<PointT>);
-        pcl::fromROSMsg(msg.plane_contours[i], *contour);
-        contours.push_back(contour);               // get the contour pointcloud here
+      contours.clear();
+      for(int i = 0; i < msg.plane_contours.size(); i++) {
+          pcl::PointCloud<PointT>::Ptr contour (new pcl::PointCloud<PointT>);
+          pcl::fromROSMsg(msg.plane_contours[i], *contour);
+          contours.push_back(contour);               // get the contour pointcloud here
+      }
+    }
+    else
+    {
+      plane_coefficients.clear();
+      contours.clear();
     }
 
     std::cout<<"In the callback function: Got " << clusters.size() << " clusters and "<< plane_coefficients.size() <<" planes"<<std::endl;  
@@ -178,17 +185,13 @@ main (int argc, char **argv)
       viewer->spinOnce(20);
 
     if(!gotCluster){
-      std::cout<<"************ I aint got no cluster! *****************"<<std::endl;
-      //std::cout<<"Counter: " <<counter<<std::endl;
-      //if (counter >= 4) {
+      std::cout<<"********** I aint got no cluster! **********"<<std::endl;
       multi_plane_app.removePreviousCLustersFromScreen(clusters.size());
       multi_plane_app.removeBoundingBoxesAndArrows(clusters.size());
-      //}
       clusters.clear();
       continue;
     }
     if(gotCluster){
-        //counter++;      // Hack to not make the visualizer crash   
         std::cout<<"********** I have a cluster! **********"<<std::endl;
     }
     std::vector<pc_cluster_features> feats;
@@ -225,7 +228,7 @@ main (int argc, char **argv)
     }
     pub.publish(rosMsg);
 
-    // TODO CHECK: The object to pick up (if that's the case) is always stored in transforms[0]. Make sure that, that is the case always
+    // TODO CHECK: The object to pick up (if that's the case) is always stored in transforms[0]. Make sure that is ALWAYS the case
     objectPoseTF(rosMsg.transforms[0]);
 
     gotCluster = false;

@@ -44,13 +44,7 @@ Box3D
 boundingBoxWithCoeff(pcl::PointCloud<PointT> &cluster, pcl::ModelCoefficients::Ptr coefficients, pcl::PointCloud<PointT>::Ptr &cloud_transformed);
 
 void
-fillRosMessage (nonplanar_segmentation::ObjectFeatures &outRosMsg, const pc_cluster_features &inObjFeatures);
-
-void
 getObjectMarker(visualization_msgs::Marker &marker, nonplanar_segmentation::ObjectFeatures &feats);
-
-void 
-objectPoseTF(geometry_msgs::Transform geom_transform);
 
 template<class pcType>
 bool

@@ -266,6 +266,9 @@ main (int argc, char **argv)
 				msg.normals.push_back(out);
 			}
 
+      // Set flag here if information about planes should be used or not
+      msg.ifPlanesUsed = true;
+
       for(int i = 0; i < plane_coefficients.size(); i++){
         std_msgs::Float32MultiArray planeCoefficientsMsg;
 			  planeCoefficientsMsg.data.clear();
