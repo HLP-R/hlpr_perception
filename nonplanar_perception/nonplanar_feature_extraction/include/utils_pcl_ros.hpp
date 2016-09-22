@@ -13,7 +13,7 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include <nonplanar_feature_extraction/ViewpointHist.h>
 #include <nonplanar_feature_extraction/OtherFeatures.h>
-#include <nonplanar_feature_extraction/RawPtCldInfo.h>
+#include <nonplanar_feature_extraction/BasicFeatures.h>
 #include <nonplanar_feature_extraction/OrientedBoundingBox.h>
 #include <nonplanar_feature_extraction/ShapeHist.h>
 #include <nonplanar_feature_extraction/ColorHist.h>
@@ -44,7 +44,7 @@ Cube_2_Arrows(pcl::ModelCoefficients &cube, boost::shared_ptr<pcl::visualization
 //boundingBoxWithCoeff(pcl::PointCloud<PointT> &cluster, pcl::ModelCoefficients::Ptr coefficients, pcl::PointCloud<PointT>::Ptr &cloud_transformed);
 
 void 
-fillRawPtCldInfoMsg (nonplanar_feature_extraction::RawPtCldInfo &rawInfo, const pc_cluster_features &inObjFeatures);
+fillBasicFeaturesMsg (nonplanar_feature_extraction::BasicFeatures &basicInfo, const pc_cluster_features &inObjFeatures);
 
 void 
 fillOrientedBoundingBoxMsg (nonplanar_feature_extraction::OrientedBoundingBox &obb, const pc_cluster_features &inObjFeatures);
@@ -68,7 +68,7 @@ fillRosMessageForObjects (nonplanar_feature_extraction::ObjectFeatures &objRosMs
 // Top-level message for Objects
 void
 fillObjectFeaturesMsg (nonplanar_feature_extraction::ObjectFeatures &objRosMsg, 
-                       nonplanar_feature_extraction::RawPtCldInfo &rawInfo,
+                       nonplanar_feature_extraction::BasicFeatures &basicInfo,
                        nonplanar_feature_extraction::OrientedBoundingBox &obb,
                        nonplanar_feature_extraction::ColorHist &hs,
                        nonplanar_feature_extraction::ShapeHist &sh,
@@ -79,7 +79,7 @@ fillObjectFeaturesMsg (nonplanar_feature_extraction::ObjectFeatures &objRosMsg,
 // Top-level message for planes
 void
 fillPlaneFeaturesMsg (nonplanar_feature_extraction::PlaneFeatures &planeRosMsg, 
-                      nonplanar_feature_extraction::RawPtCldInfo &rawInfo,
+                      nonplanar_feature_extraction::BasicFeatures &basicInfo,
                       nonplanar_feature_extraction::OrientedBoundingBox &obb,
                       const pc_cluster_features &inObjFeatures);
 

@@ -4,7 +4,7 @@ Header header
 
 geometry_msgs/Transform transform
 
-RawPtCldInfo rawInfo
+BasicFeatures basicInfo
 OrientedBoundingBox obb
 
 bool setColorHist            # Flag to state if hs_hist was computed and set (default=true)

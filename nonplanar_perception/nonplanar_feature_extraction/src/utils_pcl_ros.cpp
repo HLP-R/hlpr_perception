@@ -38,36 +38,36 @@ Cube_2_Arrows(pcl::ModelCoefficients &cube, boost::shared_ptr<pcl::visualization
 }
 
 void 
-fillRawPtCldInfoMsg (nonplanar_feature_extraction::RawPtCldInfo &rawInfo, const pc_cluster_features &inObjFeatures, bool setNumPoints)
+fillBasicFeaturesMsg (nonplanar_feature_extraction::BasicFeatures &basicInfo, const pc_cluster_features &inObjFeatures, bool setNumPoints)
 {
-  rawInfo.points_centroid.x = inObjFeatures.centroid[0];
-  rawInfo.points_centroid.y = inObjFeatures.centroid[1];
-  rawInfo.points_centroid.z = inObjFeatures.centroid[2];
+  basicInfo.points_centroid.x = inObjFeatures.centroid[0];
+  basicInfo.points_centroid.y = inObjFeatures.centroid[1];
+  basicInfo.points_centroid.z = inObjFeatures.centroid[2];
 
-  rawInfo.points_min.x = inObjFeatures.min[0];
-  rawInfo.points_min.y = inObjFeatures.min[1];
-  rawInfo.points_min.z = inObjFeatures.min[2];
+  basicInfo.points_min.x = inObjFeatures.min[0];
+  basicInfo.points_min.y = inObjFeatures.min[1];
+  basicInfo.points_min.z = inObjFeatures.min[2];
 
-  rawInfo.points_max.x = inObjFeatures.max[0];
-  rawInfo.points_max.y = inObjFeatures.max[1];
-  rawInfo.points_max.z = inObjFeatures.max[2];
+  basicInfo.points_max.x = inObjFeatures.max[0];
+  basicInfo.points_max.y = inObjFeatures.max[1];
+  basicInfo.points_max.z = inObjFeatures.max[2];
 
   if(setNumPoints == true)               // For objects, num_points is true
   {        
-      rawInfo.setNumPoints = true;
-      rawInfo.num_points = (float) inObjFeatures.volume2; 
+      basicInfo.setNumPoints = true;
+      basicInfo.num_points = (float) inObjFeatures.volume2; 
   }
   else
   {
-     rawInfo.setNumPoints = false;
-     rawInfo.num_points = 0;
+     basicInfo.setNumPoints = false;
+     basicInfo.num_points = 0;
   }
 
-  rawInfo.rgba_color.r = inObjFeatures.color[0]/255.;
-  rawInfo.rgba_color.g = inObjFeatures.color[1]/255.;
-  rawInfo.rgba_color.b = inObjFeatures.color[2]/255.;
-  rawInfo.rgba_color.a = 1.0;
-  rawInfo.hue = inObjFeatures.hue;
+  basicInfo.rgba_color.r = inObjFeatures.color[0]/255.;
+  basicInfo.rgba_color.g = inObjFeatures.color[1]/255.;
+  basicInfo.rgba_color.b = inObjFeatures.color[2]/255.;
+  basicInfo.rgba_color.a = 1.0;
+  basicInfo.hue = inObjFeatures.hue;
 } 
 
 void 
@@ -125,7 +125,7 @@ fillOtherFeaturesMsg(nonplanar_feature_extraction::OtherFeatures &other, const p
 
 void 
 fillObjectFeaturesMsg (nonplanar_feature_extraction::ObjectFeatures &objRosMsg, 
-                   nonplanar_feature_extraction::RawPtCldInfo &rawInfo,
+                   nonplanar_feature_extraction::BasicFeatures &basicInfo,
                    nonplanar_feature_extraction::OrientedBoundingBox &obb,
                    nonplanar_feature_extraction::ColorHist &hs,
                    nonplanar_feature_extraction::ShapeHist &sh,
@@ -144,7 +144,7 @@ fillObjectFeaturesMsg (nonplanar_feature_extraction::ObjectFeatures &objRosMsg,
     objRosMsg.transform.rotation.z = obb.bb_rot_quat.z;
     objRosMsg.transform.rotation.w = obb.bb_rot_quat.w;
 
-    objRosMsg.rawInfo = rawInfo;
+    objRosMsg.basicInfo = basicInfo;
     objRosMsg.obb = obb;
    
     objRosMsg.setColorHist = inObjFeatures.setColorHist;
@@ -162,13 +162,13 @@ fillObjectFeaturesMsg (nonplanar_feature_extraction::ObjectFeatures &objRosMsg,
 
 void
 fillPlaneFeaturesMsg(nonplanar_feature_extraction::PlaneFeatures &planeRosMsg, 
-                     nonplanar_feature_extraction::RawPtCldInfo &rawInfo,
+                     nonplanar_feature_extraction::BasicFeatures &basicInfo,
                      nonplanar_feature_extraction::OrientedBoundingBox &obb,
                      const pc_cluster_features &inObjFeatures)
 {
   planeRosMsg.header.stamp = ros::Time::now();
 
-  planeRosMsg.rawInfo = rawInfo;
+  planeRosMsg.basicInfo = basicInfo;
   planeRosMsg.obb = obb;
 }
 
@@ -176,9 +176,9 @@ fillPlaneFeaturesMsg(nonplanar_feature_extraction::PlaneFeatures &planeRosMsg,
 void
 fillRosMessageForObjects (nonplanar_feature_extraction::ObjectFeatures &objRosMsg, const pc_cluster_features &inObjFeatures)
 {
-  // Fill up the RawPtCldInfo.msg
-  nonplanar_feature_extraction::RawPtCldInfo rawInfo;
-  fillRawPtCldInfoMsg(rawInfo, inObjFeatures, true);
+  // Fill up the BasicFeatures.msg
+  nonplanar_feature_extraction::BasicFeatures basicInfo;
+  fillBasicFeaturesMsg(basicInfo, inObjFeatures, true);
 
   // Fill up the OrientedBoundingBox.msg
   nonplanar_feature_extraction::OrientedBoundingBox obb;
@@ -201,22 +201,22 @@ fillRosMessageForObjects (nonplanar_feature_extraction::ObjectFeatures &objRosMs
   fillOtherFeaturesMsg(other, inObjFeatures);
 
   // Fill out the top-level main msg for objects
-  fillObjectFeaturesMsg(objRosMsg, rawInfo, obb, hs, sh, vph, other, inObjFeatures);
+  fillObjectFeaturesMsg(objRosMsg, basicInfo, obb, hs, sh, vph, other, inObjFeatures);
 }
 
 void
 fillRosMessageForPlanes (nonplanar_feature_extraction::PlaneFeatures &planeRosMsg, const pc_cluster_features &inObjFeatures)
 {
-  // Fill up the RawPtCldInfo.msg
-  nonplanar_feature_extraction::RawPtCldInfo rawInfo;
-  fillRawPtCldInfoMsg(rawInfo, inObjFeatures, false);           // False flag sent as the volume for planes is not right
+  // Fill up the BasicFeatures.msg
+  nonplanar_feature_extraction::BasicFeatures basicInfo;
+  fillBasicFeaturesMsg(basicInfo, inObjFeatures, false);           // False flag sent as the volume for planes is not right
  
   // Fill up the OrientedBoundingBox.msg
   nonplanar_feature_extraction::OrientedBoundingBox obb;
   fillOrientedBoundingBoxMsg(obb, inObjFeatures);
 
   // Fill out the top-level main msg for planes
-  fillPlaneFeaturesMsg(planeRosMsg, rawInfo, obb, inObjFeatures);
+  fillPlaneFeaturesMsg(planeRosMsg, basicInfo, obb, inObjFeatures);
 }
 
 void objectPoseTF(geometry_msgs::Transform geom_transform)

@@ -23,7 +23,7 @@ find_package(OpenCV REQUIRED)
 
 add_message_files(
   FILES
-  RawPtCldInfo.msg
+  BasicFeatures.msg
   ShapeHist.msg
   ColorHist.msg
   OrientedBoundingBox.msg
