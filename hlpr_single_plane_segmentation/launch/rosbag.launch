@@ -1,0 +1,12 @@
+<!-- Starts up everything needed to run the example listener/talker nodes. -->
+<launch>
+  <arg name="segmentation/viz" default="true" />
+  <arg name="segmentation/rt" default="/kinect/sd/points" />
+  <arg name="segmentation/src" default="0" />
+
+  <node pkg="segmentation" type="pc_seg" name="pc_seg" output="screen">
+    <param name="segmentation/viz" value="$(arg segmentation/viz)" />
+    <param name="segmentation/rt" value="$(arg segmentation/rt)" />
+    <param name="segmentation/src" value="$(arg segmentation/src)" />
+  </node>
+</launch>
