@@ -83,17 +83,11 @@
 // Useful definitions
 //typedef pcl::PointXYZRGBA PointT;
 
-template<class T>
-static inline T myAbs(T _a)
-{
-    return _a < 0 ? -_a : _a;
-}
-
 // Set up the visualization window
 boost::shared_ptr<pcl::visualization::PCLVisualizer>
 cloudViewer (pcl::PointCloud<PointT>::ConstPtr cloud);
 
-class OpenNIOrganizedMultiPlaneSegmentation
+class RansacSinglePlaneSegmentation
 {
 private:
   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
@@ -106,10 +100,10 @@ private:
   bool viewer_enabled;
 
 public:
-  OpenNIOrganizedMultiPlaneSegmentation () : viewer_enabled(false), verbose(true)
+  RansacSinglePlaneSegmentation () : viewer_enabled(false), verbose(true)
   {
   }
-  /*~OpenNIOrganizedMultiPlaneSegmentation ()
+  /*~RansacSinglePlaneSegmentation ()
   {
   }*/
 
@@ -127,23 +121,13 @@ public:
   pcl::IntegralImageNormalEstimation<PointT, pcl::Normal> ne;
   pcl::NormalEstimation<PointT, pcl::Normal> norm_est;
   pcl::MyEuclideanClusterComparator<PointT, pcl::Normal, pcl::Label>::Ptr euclidean_cluster_comparator_;
-//#if COLOR_SEG==2
-  //pcl::HueEuclideanClusterComparator<PointT, pcl::Normal, pcl::Label>::Ptr euclidean_cluster_comparator_;
-
-//#else
-//  pcl::RGBEuclideanClusterComparator<PointT, pcl::Normal, pcl::Label>::Ptr euclidean_cluster_comparator_;
-//#endif
-  pcl::OrganizedMultiPlaneSegmentation<PointT, pcl::Normal, pcl::Label> mps;
   pcl::search::Search <PointT>::Ptr tree;
 
   //RANSAC
   pcl::SACSegmentation<PointT> seg;
   pcl::VoxelGrid<PointT> vg;
 
-
-
   pcl::VFHEstimation<PointT, pcl::Normal, pcl::VFHSignature308> vfh;
-
   pcl::RegionGrowingRGB<PointT> reg;
 
   pcl::StatisticalOutlierRemoval<PointT>::Ptr sor;
@@ -165,7 +149,8 @@ public:
 
   void
   displayPlane(pcl::PointCloud<PointT>::Ptr contour);
-
+  void
+  setWorkingVolumeThresholds(float* a);
   //allow for reading a file
   void
   initSegmentation(int color_seg = COLOR_SEG, float distance_thresh = 0.05, float color_thresh = 25);
@@ -177,20 +162,6 @@ public:
 
   void
   preProcPointCloud(pcl::PointCloud<PointT>::Ptr filtered_cloud, bool noiseFilter = false);
-
-  //this one has a lot of stuff, maybe merge with segmentation
-  void
-  planeExtract(
-      pcl::PointCloud<PointT>::Ptr filtered_cloud,
-      std::vector<pcl::PlanarRegion<PointT>, Eigen::aligned_allocator<pcl::PlanarRegion<PointT> > > &regions,
-      pcl::PointCloud<pcl::Normal>::Ptr normal_cloud,
-      std::vector<pcl::ModelCoefficients> &model_coefficients,
-      std::vector<pcl::PointIndices> &inlier_indices,
-      pcl::PointCloud<pcl::Label>::Ptr labels,
-      std::vector<pcl::PointIndices> &label_indices,
-      std::vector<pcl::PointIndices> &boundary_indices,
-      bool estimate_normals = true
-      );
 
   //downsample
   void 
@@ -206,17 +177,6 @@ public:
     pcl::PointCloud<pcl::Normal>::Ptr normal_cloud
     );
 
-  float
-  getClosestPlaneModel(std::vector<pcl::PlanarRegion<PointT>, Eigen::aligned_allocator<pcl::PlanarRegion<PointT> > > &regions, int &closestIndex);
-
-  void
-  segmentPointCloud(pcl::PointCloud<PointT>::Ptr filtered_cloud,
-                   pcl::PointCloud<PointT>::CloudVectorType &clusters,
-                   std::vector<pcl::PointCloud<pcl::Normal> > &cluster_normals,
-                   pcl::PointCloud<PointT>::Ptr &contour,
-                   Eigen::Vector4f &used_plane_model,
-		   std::vector<std::vector<int>> &clusterIndices);
-
   void
   segmentPointCloud(pcl::ModelCoefficients::Ptr &coefficients,
                                                          pcl::PointCloud<PointT>::Ptr cloud_filtered,
@@ -224,9 +184,6 @@ public:
                                                          std::vector<pcl::PointCloud<pcl::Normal> > &cluster_normals,
                                                          pcl::PointCloud<PointT>::Ptr &cloud_plane
                                                          );
-
-  void
-  setWorkingVolumeThresholds(float* a);
 
   int
   processOnce (pcl::PointCloud<PointT>::ConstPtr prev_cl,
