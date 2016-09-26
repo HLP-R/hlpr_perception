@@ -62,43 +62,35 @@ void
 cluster_cb (const nonplanar_segmentation::NonPlanarSegClusters& msg)
 {
     clusters.clear();
-    for(int i = 0; i < msg.clusters.size(); i++) {
+    for(int i = 0; i < msg.segmentedClusters.clusters.size(); i++) {
         pcl::PointCloud<PointT>::Ptr pclCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-        pcl::fromROSMsg(msg.clusters[i], *pclCloud);
+        pcl::fromROSMsg(msg.segmentedClusters.clusters[i], *pclCloud);
         clusters.push_back(*pclCloud);               // get the pointcloud here
     }
 
     normals.clear();
-    for(int i = 0; i < msg.normals.size(); i++) {
+    for(int i = 0; i < msg.segmentedClusters.normals.size(); i++) {
         pcl::PointCloud<pcl::Normal>::Ptr pclCloud (new pcl::PointCloud<pcl::Normal>);
-        pcl::fromROSMsg(msg.normals[i], *pclCloud);
+        pcl::fromROSMsg(msg.segmentedClusters.normals[i], *pclCloud);
         normals.push_back(*pclCloud);                // get the normals here
     }
   
-    if(msg.ifPlanesUsed == true)
-    {
-      plane_coefficients.clear();
-      for(int j = 0; j<msg.plane_coefficients.size(); j++) {
-        std::vector<float>::const_iterator it = msg.plane_coefficients[j].data.begin();
-        Eigen::Vector4f plane;
-        for(int i = 0; i < 4; i++) {
-	        plane[i] = *it;
-	        ++it;
-        }
-        plane_coefficients.push_back(plane);           // get the plane coefficients here
+    plane_coefficients.clear();
+    for(int j = 0; j<msg.segmentedPlanes.plane_coefficients.size(); j++) {
+      std::vector<float>::const_iterator it = msg.segmentedPlanes.plane_coefficients[j].data.begin();
+      Eigen::Vector4f plane;
+      for(int i = 0; i < 4; i++) {
+        plane[i] = *it;
+        ++it;
       }
-
-      contours.clear();
-      for(int i = 0; i < msg.plane_contours.size(); i++) {
-          pcl::PointCloud<PointT>::Ptr contour (new pcl::PointCloud<PointT>);
-          pcl::fromROSMsg(msg.plane_contours[i], *contour);
-          contours.push_back(contour);               // get the contour pointcloud here
-      }
+      plane_coefficients.push_back(plane);           // get the plane coefficients here
     }
-    else
-    {
-      plane_coefficients.clear();
-      contours.clear();
+
+    contours.clear();
+    for(int i = 0; i < msg.segmentedPlanes.plane_contours.size(); i++) {
+        pcl::PointCloud<PointT>::Ptr contour (new pcl::PointCloud<PointT>);
+        pcl::fromROSMsg(msg.segmentedPlanes.plane_contours[i], *contour);
+        contours.push_back(contour);               // get the contour pointcloud here
     }
 
     std::cout<<"In the callback function: Got " << clusters.size() << " clusters and "<< plane_coefficients.size() <<" planes"<<std::endl;  

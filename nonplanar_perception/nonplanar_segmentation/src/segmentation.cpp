@@ -248,6 +248,9 @@ main (int argc, char **argv)
     selected_cluster_index = multi_plane_app.processOnce(prev_cloud,clusters,clusterNormals,plane_coefficients, contours, pA.pre_proc, pA.merge_clusters, viz_, pA.filterNoise); //true is for the viewer
 
 			nonplanar_segmentation::NonPlanarSegClusters msg;
+      nonplanar_segmentation::SegClusters clusterMsg;              // Msg for object cluster
+      nonplanar_segmentation::SegPlanes planesMsg;                 // Msg for planes cluster
+
 			msg.header.stamp = ros::Time::now();
 
 			for(int i = 0; i < clusters.size(); i++) {
@@ -255,7 +258,7 @@ main (int argc, char **argv)
 				pcl::PCLPointCloud2 tmp;
 				pcl::toPCLPointCloud2(clusters[i], tmp);
 				pcl_conversions::fromPCL(tmp, out);
-				msg.clusters.push_back(out);
+				clusterMsg.clusters.push_back(out);
 			}
 
 			for(int i = 0; i < clusterNormals.size(); i++) {
@@ -263,11 +266,8 @@ main (int argc, char **argv)
 				pcl::PCLPointCloud2 tmp;
 				pcl::toPCLPointCloud2(clusterNormals[i], tmp);
 				pcl_conversions::fromPCL(tmp, out);
-				msg.normals.push_back(out);
+				clusterMsg.normals.push_back(out);
 			}
-
-      // Set flag here if information about planes should be used or not
-      msg.ifPlanesUsed = true;
 
       for(int i = 0; i < plane_coefficients.size(); i++){
         std_msgs::Float32MultiArray planeCoefficientsMsg;
@@ -275,7 +275,7 @@ main (int argc, char **argv)
 			  for(int j = 0; j < 4; j++)
 				  planeCoefficientsMsg.data.push_back(plane_coefficients[i][j]);
 			  //planePub.publish(planeCoefficientsMsg);
-			  msg.plane_coefficients.push_back(planeCoefficientsMsg);
+			  planesMsg.plane_coefficients.push_back(planeCoefficientsMsg);
 			}
 
       for(int i = 0; i < contours.size(); i++){
@@ -283,9 +283,11 @@ main (int argc, char **argv)
         pcl::PCLPointCloud2 tmp;
         pcl::toPCLPointCloud2(*contours[i], tmp);
         pcl_conversions::fromPCL(tmp, planeContour);
-        msg.plane_contours.push_back(planeContour);  
+        planesMsg.plane_contours.push_back(planeContour);  
       }
-
+      
+      msg.segmentedClusters = clusterMsg;
+      msg.segmentedPlanes = planesMsg;
 			msgPub.publish(msg);
 
 			/*clusterPub.publish(clusters[0]);

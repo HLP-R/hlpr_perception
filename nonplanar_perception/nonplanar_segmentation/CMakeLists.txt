@@ -22,6 +22,8 @@ find_package(OpenCV REQUIRED)
 add_message_files(
   FILES
   NonPlanarSegClusters.msg
+  SegClusters.msg
+  SegPlanes.msg
 )
 
 generate_messages(
