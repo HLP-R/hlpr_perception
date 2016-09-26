@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(nonplanar_feature_extraction)
+project(hlpr_nonplanar_segmentation)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
@@ -11,34 +11,26 @@ set(ROS_LIBRARIES /opt/ros/${ROS_DISTRO}/lib/libroscpp.so
         /opt/ros/${ROS_DISTRO}/lib/libroscpp_serialization.so 
         /opt/ros/${ROS_DISTRO}/lib/librosconsole.so     
         /opt/ros/${ROS_DISTRO}/lib/libroslib.so
-    /opt/ros/${ROS_DISTRO}/lib/librostime.so
-            /opt/ros/${ROS_DISTRO}/lib/libtf2.so
-        /opt/ros/${ROS_DISTRO}/lib/libtf2_ros.so)
+    /opt/ros/${ROS_DISTRO}/lib/librostime.so)
 
 #find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure message_generation roscpp std_msgs geometry_msgs)
-find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs geometry_msgs tf2_ros nonplanar_segmentation)
+find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs geometry_msgs sensor_msgs)
 find_package(PCL 1.8 REQUIRED COMPONENTS)
 find_package(freenect2 REQUIRED)
 find_package(OpenCV REQUIRED)
 
 add_message_files(
   FILES
-  BasicFeatures.msg
-  ShapeHist.msg
-  ColorHist.msg
-  OrientedBoundingBox.msg
-  OtherFeatures.msg
-  ViewpointHist.msg
-  ObjectFeatures.msg
-  PlaneFeatures.msg
-  ExtractedFeaturesArray.msg
+  NonPlanarSegClusters.msg
+  SegClusters.msg
+  SegPlanes.msg
 )
 
 generate_messages(
   DEPENDENCIES
   std_msgs
   geometry_msgs
-  nonplanar_segmentation
+  sensor_msgs
 )
 
 #generate_dynamic_reconfigure_options(
@@ -47,7 +39,7 @@ generate_messages(
 
 catkin_package(
  # CATKIN_DEPENDS dynamic_reconfigure message_runtime roscpp std_msgs geometry_msgs
-  CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs
+  CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs sensor_msgs
 )
 
 include_directories(${PCL_INCLUDE_DIRS})
@@ -58,14 +50,16 @@ include_directories(${freenect2_INCLUDE_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-add_library(nonplanarftex SHARED src/cluster_processing.cpp src/rotcalipers.cpp src/utils.cpp src/utils_pcl_ros.cpp)
-target_link_libraries(nonplanarftex ${PCL_LIBRARIES} ${ROS_LIBRARIES})
+add_library(nonplanarseg SHARED src/pc_segmentation.cpp src/utils.cpp)
+target_link_libraries(nonplanarseg ${PCL_LIBRARIES} ${ROS_LIBRARIES})
 
-add_executable(nonplanar_ft_ex src/feature_extraction.cpp)
+add_executable(nonplanar_seg src/segmentation.cpp)
 #add_executable(listener src/listener.cpp src/nodes/listener_node.cpp)
 #target_link_libraries(pc_seg ${catkin_LIBRARIES} ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
-target_link_libraries(nonplanar_ft_ex ${PCL_LIBRARIES} nonplanarftex ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
-add_dependencies(nonplanar_ft_ex nonplanar_feature_extraction_generate_messages_cpp)
+target_link_libraries(nonplanar_seg ${PCL_LIBRARIES} nonplanarseg ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
+
+#add_dependencies(pc_seg segmentation_gencfg segmentation_generate_messages_cpp)
+add_dependencies(nonplanar_seg segmentation_generate_messages_cpp)
 
 
 #install(DIRECTORY include/${PROJECT_NAME}/
@@ -74,7 +68,7 @@ install(DIRECTORY include/
   FILES_MATCHING PATTERN "*.h"
 )
 
-install(TARGETS nonplanar_ft_ex
+install(TARGETS nonplanar_seg
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

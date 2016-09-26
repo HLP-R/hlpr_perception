@@ -1,7 +1,7 @@
 <package format="2">
-  <name>nonplanar_feature_extraction</name>
+  <name>hlpr_nonplanar_segmentation</name>
   <version>0.0.1</version>
-  <description>Nonplanar Feature Extraction</description>
+  <description>Object segmentation</description>
   <maintainer email="priyanka.khante@utexas.edu">Priyanka Khante</maintainer>
   <license>TBD</license>
 
@@ -12,7 +12,7 @@
   <!-- depend>dynamic_reconfigure</depend -->
   <depend>roscpp</depend>
   <depend>rospy</depend>
-  <depend>tf2_ros</depend>
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
+  <depend>sensor_msgs</depend>
 </package>
