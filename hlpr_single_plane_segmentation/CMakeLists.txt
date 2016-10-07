@@ -49,13 +49,13 @@ include_directories(${freenect2_INCLUDE_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-add_library(pcseg SHARED src/pc_segmentation.cpp src/utils.cpp)
-target_link_libraries(pcseg ${PCL_LIBRARIES} ${ROS_LIBRARIES})
+add_library(pc_seg SHARED src/pc_segmentation.cpp src/utils.cpp)
+target_link_libraries(sgseg ${PCL_LIBRARIES} ${ROS_LIBRARIES})
 
 add_executable(pc_seg src/segmentation.cpp)
 #add_executable(listener src/listener.cpp src/nodes/listener_node.cpp)
 #target_link_libraries(pc_seg ${catkin_LIBRARIES} ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
-target_link_libraries(pc_seg ${PCL_LIBRARIES} pcseg ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(pc_seg ${PCL_LIBRARIES} sgseg ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
 
 #add_dependencies(pc_seg segmentation_gencfg segmentation_generate_messages_cpp)
 add_dependencies(pc_seg segmentation_generate_messages_cpp)
