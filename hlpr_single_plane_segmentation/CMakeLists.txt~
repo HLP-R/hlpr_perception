@@ -49,7 +49,7 @@ include_directories(${freenect2_INCLUDE_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-add_library(sgseg SHARED src/pc_segmentation.cpp src/utils.cpp)
+add_library(sg_seg SHARED src/pc_segmentation.cpp src/utils.cpp)
 target_link_libraries(sgseg ${PCL_LIBRARIES} ${ROS_LIBRARIES})
 
 add_executable(sg_seg src/segmentation.cpp)
