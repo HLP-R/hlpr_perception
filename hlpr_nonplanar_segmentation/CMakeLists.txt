@@ -14,32 +14,17 @@ set(ROS_LIBRARIES /opt/ros/${ROS_DISTRO}/lib/libroscpp.so
     /opt/ros/${ROS_DISTRO}/lib/librostime.so)
 
 #find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure message_generation roscpp std_msgs geometry_msgs)
-find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs geometry_msgs sensor_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs geometry_msgs sensor_msgs hlpr_perception_msgs)
 find_package(PCL 1.8 REQUIRED COMPONENTS)
 find_package(freenect2 REQUIRED)
 find_package(OpenCV REQUIRED)
-
-add_message_files(
-  FILES
-  NonPlanarSegClusters.msg
-  SegClusters.msg
-  SegPlanes.msg
-)
-
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  geometry_msgs
-  sensor_msgs
-)
 
 #generate_dynamic_reconfigure_options(
 #  cfg/segmentation.cfg
 #)
 
 catkin_package(
- # CATKIN_DEPENDS dynamic_reconfigure message_runtime roscpp std_msgs geometry_msgs
-  CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs sensor_msgs
+  #CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs
 )
 
 include_directories(${PCL_INCLUDE_DIRS})
@@ -59,7 +44,7 @@ add_executable(nonplanar_seg src/segmentation.cpp)
 target_link_libraries(nonplanar_seg ${PCL_LIBRARIES} nonplanarseg ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
 
 #add_dependencies(pc_seg segmentation_gencfg segmentation_generate_messages_cpp)
-add_dependencies(nonplanar_seg segmentation_generate_messages_cpp)
+add_dependencies(nonplanar_seg hlpr_perception_msgs_generate_messages_cpp)
 
 
 #install(DIRECTORY include/${PROJECT_NAME}/

@@ -13,7 +13,15 @@
   <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
-
+  <run_depend>hlpr_nonplanar_segmentation</run_depend>
+  <run_depend>hlpr_nonplanar_feature_extraction</run_depend>
+  <run_depend>hlpr_perception_msgs</run_depend>
+  <run_depend>hlpr_segmentation</run_depend>
+  <run_depend>hlpr_single_plane_segmentation</run_depend>
+  <run_depend>hlpr_feature_extraction</run_depend>
+  <run_depend>hlpr_object_labeling</run_depend>
+  <run_depend>hlpr_knowledge_retrieval</run_depend>  
+  
   <export>
     <metapackage />
   </export>

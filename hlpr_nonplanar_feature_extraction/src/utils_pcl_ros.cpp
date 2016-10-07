@@ -38,7 +38,7 @@ Cube_2_Arrows(pcl::ModelCoefficients &cube, boost::shared_ptr<pcl::visualization
 }
 
 void 
-fillBasicFeaturesMsg (nonplanar_feature_extraction::BasicFeatures &basicInfo, const pc_cluster_features &inObjFeatures, bool setNumPoints)
+fillBasicFeaturesMsg (hlpr_perception_msgs::BasicFeatures &basicInfo, const pc_cluster_features &inObjFeatures, bool setNumPoints)
 {
   basicInfo.points_centroid.x = inObjFeatures.centroid[0];
   basicInfo.points_centroid.y = inObjFeatures.centroid[1];
@@ -71,7 +71,7 @@ fillBasicFeaturesMsg (nonplanar_feature_extraction::BasicFeatures &basicInfo, co
 } 
 
 void 
-fillOrientedBoundingBoxMsg (nonplanar_feature_extraction::OrientedBoundingBox &obb, const pc_cluster_features &inObjFeatures)
+fillOrientedBoundingBoxMsg (hlpr_perception_msgs::OrientedBoundingBox &obb, const pc_cluster_features &inObjFeatures)
 {
   obb.bb_center.x = inObjFeatures.oriented_bounding_box.center.x;
   obb.bb_center.y = inObjFeatures.oriented_bounding_box.center.y;
@@ -88,7 +88,7 @@ fillOrientedBoundingBoxMsg (nonplanar_feature_extraction::OrientedBoundingBox &o
 }
 
 void
-fillColorHistMsg(nonplanar_feature_extraction::ColorHist &hs, const pc_cluster_features &inObjFeatures)
+fillColorHistMsg(hlpr_perception_msgs::ColorHist &hs, const pc_cluster_features &inObjFeatures)
 {
   hs.hs_features_size = 256;
   for(int i = 0;i<hs.hs_features_size;i++)
@@ -96,7 +96,7 @@ fillColorHistMsg(nonplanar_feature_extraction::ColorHist &hs, const pc_cluster_f
 }
 
 void
-fillShapeHistMsg(nonplanar_feature_extraction::ShapeHist &sh, const pc_cluster_features &inObjFeatures)
+fillShapeHistMsg(hlpr_perception_msgs::ShapeHist &sh, const pc_cluster_features &inObjFeatures)
 {
   sh.cvfh_features_size = 308;
   for(int i = 0;i<sh.cvfh_features_size;i++)
@@ -108,7 +108,7 @@ fillShapeHistMsg(nonplanar_feature_extraction::ShapeHist &sh, const pc_cluster_f
 }
 
 void 
-fillViewpointHistMsg(nonplanar_feature_extraction::ViewpointHist &vph, const pc_cluster_features &inObjFeatures)
+fillViewpointHistMsg(hlpr_perception_msgs::ViewpointHist &vph, const pc_cluster_features &inObjFeatures)
 {
   vph.vfh_features_size = 308;
   for(int i = 0;i<vph.vfh_features_size;i++)
@@ -116,7 +116,7 @@ fillViewpointHistMsg(nonplanar_feature_extraction::ViewpointHist &vph, const pc_
 }
 
 void 
-fillOtherFeaturesMsg(nonplanar_feature_extraction::OtherFeatures &other, const pc_cluster_features &inObjFeatures)
+fillOtherFeaturesMsg(hlpr_perception_msgs::OtherFeatures &other, const pc_cluster_features &inObjFeatures)
 {
   other.other_features_size = inObjFeatures.otherFeatures.size();
   for(int i = 0;i<other.other_features_size;i++)
@@ -124,13 +124,13 @@ fillOtherFeaturesMsg(nonplanar_feature_extraction::OtherFeatures &other, const p
 }
 
 void 
-fillObjectFeaturesMsg (nonplanar_feature_extraction::ObjectFeatures &objRosMsg, 
-                   nonplanar_feature_extraction::BasicFeatures &basicInfo,
-                   nonplanar_feature_extraction::OrientedBoundingBox &obb,
-                   nonplanar_feature_extraction::ColorHist &hs,
-                   nonplanar_feature_extraction::ShapeHist &sh,
-                   nonplanar_feature_extraction::ViewpointHist &vph,
-                   nonplanar_feature_extraction::OtherFeatures &other,
+fillObjectFeaturesMsg (hlpr_perception_msgs::ObjectFeatures &objRosMsg, 
+                   hlpr_perception_msgs::BasicFeatures &basicInfo,
+                   hlpr_perception_msgs::OrientedBoundingBox &obb,
+                   hlpr_perception_msgs::ColorHist &hs,
+                   hlpr_perception_msgs::ShapeHist &sh,
+                   hlpr_perception_msgs::ViewpointHist &vph,
+                   hlpr_perception_msgs::OtherFeatures &other,
                    const pc_cluster_features &inObjFeatures)
 {
     objRosMsg.header.stamp = ros::Time::now();
@@ -161,9 +161,9 @@ fillObjectFeaturesMsg (nonplanar_feature_extraction::ObjectFeatures &objRosMsg,
 }
 
 void
-fillPlaneFeaturesMsg(nonplanar_feature_extraction::PlaneFeatures &planeRosMsg, 
-                     nonplanar_feature_extraction::BasicFeatures &basicInfo,
-                     nonplanar_feature_extraction::OrientedBoundingBox &obb,
+fillPlaneFeaturesMsg(hlpr_perception_msgs::PlaneFeatures &planeRosMsg, 
+                     hlpr_perception_msgs::BasicFeatures &basicInfo,
+                     hlpr_perception_msgs::OrientedBoundingBox &obb,
                      const pc_cluster_features &inObjFeatures)
 {
   planeRosMsg.header.stamp = ros::Time::now();
@@ -174,30 +174,30 @@ fillPlaneFeaturesMsg(nonplanar_feature_extraction::PlaneFeatures &planeRosMsg,
 
 // Takes in all the features and then fills up the messages accordingly
 void
-fillRosMessageForObjects (nonplanar_feature_extraction::ObjectFeatures &objRosMsg, const pc_cluster_features &inObjFeatures)
+fillRosMessageForObjects (hlpr_perception_msgs::ObjectFeatures &objRosMsg, const pc_cluster_features &inObjFeatures)
 {
   // Fill up the BasicFeatures.msg
-  nonplanar_feature_extraction::BasicFeatures basicInfo;
+  hlpr_perception_msgs::BasicFeatures basicInfo;
   fillBasicFeaturesMsg(basicInfo, inObjFeatures, true);
 
   // Fill up the OrientedBoundingBox.msg
-  nonplanar_feature_extraction::OrientedBoundingBox obb;
+  hlpr_perception_msgs::OrientedBoundingBox obb;
   fillOrientedBoundingBoxMsg(obb, inObjFeatures);
   
   // Fill up the ColorHist.msg
-  nonplanar_feature_extraction::ColorHist hs;
+  hlpr_perception_msgs::ColorHist hs;
   fillColorHistMsg(hs, inObjFeatures);
 
   // Fill up the ShapeHist.msg
-  nonplanar_feature_extraction::ShapeHist sh;
+  hlpr_perception_msgs::ShapeHist sh;
   fillShapeHistMsg(sh, inObjFeatures);
 
   // Fill up the ViewpointHist.msg
-  nonplanar_feature_extraction::ViewpointHist vph;
+  hlpr_perception_msgs::ViewpointHist vph;
   fillViewpointHistMsg(vph, inObjFeatures);
 
   // Fill up OtherFeatures.msg
-  nonplanar_feature_extraction::OtherFeatures other;
+  hlpr_perception_msgs::OtherFeatures other;
   fillOtherFeaturesMsg(other, inObjFeatures);
 
   // Fill out the top-level main msg for objects
@@ -205,14 +205,14 @@ fillRosMessageForObjects (nonplanar_feature_extraction::ObjectFeatures &objRosMs
 }
 
 void
-fillRosMessageForPlanes (nonplanar_feature_extraction::PlaneFeatures &planeRosMsg, const pc_cluster_features &inObjFeatures)
+fillRosMessageForPlanes (hlpr_perception_msgs::PlaneFeatures &planeRosMsg, const pc_cluster_features &inObjFeatures)
 {
   // Fill up the BasicFeatures.msg
-  nonplanar_feature_extraction::BasicFeatures basicInfo;
+  hlpr_perception_msgs::BasicFeatures basicInfo;
   fillBasicFeaturesMsg(basicInfo, inObjFeatures, false);           // False flag sent as the volume for planes is not right
  
   // Fill up the OrientedBoundingBox.msg
-  nonplanar_feature_extraction::OrientedBoundingBox obb;
+  hlpr_perception_msgs::OrientedBoundingBox obb;
   fillOrientedBoundingBoxMsg(obb, inObjFeatures);
 
   // Fill out the top-level main msg for planes

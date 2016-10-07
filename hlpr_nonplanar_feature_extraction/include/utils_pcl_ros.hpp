@@ -11,14 +11,14 @@
 #include <pcl/visualization/pcl_visualizer.h>
 #include <visualization_msgs/Marker.h>
 #include <tf2_ros/transform_broadcaster.h>
-#include <nonplanar_feature_extraction/ViewpointHist.h>
-#include <nonplanar_feature_extraction/OtherFeatures.h>
-#include <nonplanar_feature_extraction/BasicFeatures.h>
-#include <nonplanar_feature_extraction/OrientedBoundingBox.h>
-#include <nonplanar_feature_extraction/ShapeHist.h>
-#include <nonplanar_feature_extraction/ColorHist.h>
-#include <nonplanar_feature_extraction/ObjectFeatures.h>
-#include <nonplanar_feature_extraction/PlaneFeatures.h>
+#include <hlpr_perception_msgs/ViewpointHist.h>
+#include <hlpr_perception_msgs/OtherFeatures.h>
+#include <hlpr_perception_msgs/BasicFeatures.h>
+#include <hlpr_perception_msgs/OrientedBoundingBox.h>
+#include <hlpr_perception_msgs/ShapeHist.h>
+#include <hlpr_perception_msgs/ColorHist.h>
+#include <hlpr_perception_msgs/ObjectFeatures.h>
+#include <hlpr_perception_msgs/PlaneFeatures.h>
 
 /*
  * Ties are resolved by the cluster size
@@ -44,50 +44,50 @@ Cube_2_Arrows(pcl::ModelCoefficients &cube, boost::shared_ptr<pcl::visualization
 //boundingBoxWithCoeff(pcl::PointCloud<PointT> &cluster, pcl::ModelCoefficients::Ptr coefficients, pcl::PointCloud<PointT>::Ptr &cloud_transformed);
 
 void 
-fillBasicFeaturesMsg (nonplanar_feature_extraction::BasicFeatures &basicInfo, const pc_cluster_features &inObjFeatures);
+fillBasicFeaturesMsg (hlpr_perception_msgs::BasicFeatures &basicInfo, const pc_cluster_features &inObjFeatures);
 
 void 
-fillOrientedBoundingBoxMsg (nonplanar_feature_extraction::OrientedBoundingBox &obb, const pc_cluster_features &inObjFeatures);
+fillOrientedBoundingBoxMsg (hlpr_perception_msgs::OrientedBoundingBox &obb, const pc_cluster_features &inObjFeatures);
 
 void 
-fillColorHistMsg(nonplanar_feature_extraction::ColorHist &hs, const pc_cluster_features &inObjFeatures);
+fillColorHistMsg(hlpr_perception_msgs::ColorHist &hs, const pc_cluster_features &inObjFeatures);
 
 void 
-fillShapeHistMsg(nonplanar_feature_extraction::ShapeHist &sh, const pc_cluster_features &inObjFeatures);
+fillShapeHistMsg(hlpr_perception_msgs::ShapeHist &sh, const pc_cluster_features &inObjFeatures);
 
 void
-fillViewpointHistMsg(nonplanar_feature_extraction::ViewpointHist &vph, const pc_cluster_features &inObjFeatures);
+fillViewpointHistMsg(hlpr_perception_msgs::ViewpointHist &vph, const pc_cluster_features &inObjFeatures);
 
 void
-fillRosMessageForPlanes (nonplanar_feature_extraction::PlaneFeatures &planeRosMsg, const pc_cluster_features &inObjFeatures);
+fillRosMessageForPlanes (hlpr_perception_msgs::PlaneFeatures &planeRosMsg, const pc_cluster_features &inObjFeatures);
 
 void
-fillRosMessageForObjects (nonplanar_feature_extraction::ObjectFeatures &objRosMsg, 
+fillRosMessageForObjects (hlpr_perception_msgs::ObjectFeatures &objRosMsg, 
                             const pc_cluster_features &inObjFeatures);
 
 // Top-level message for Objects
 void
-fillObjectFeaturesMsg (nonplanar_feature_extraction::ObjectFeatures &objRosMsg, 
-                       nonplanar_feature_extraction::BasicFeatures &basicInfo,
-                       nonplanar_feature_extraction::OrientedBoundingBox &obb,
-                       nonplanar_feature_extraction::ColorHist &hs,
-                       nonplanar_feature_extraction::ShapeHist &sh,
-                       nonplanar_feature_extraction::ViewpointHist &vph,
-                       nonplanar_feature_extraction::OtherFeatures &other,
+fillObjectFeaturesMsg (hlpr_perception_msgs::ObjectFeatures &objRosMsg, 
+                       hlpr_perception_msgs::BasicFeatures &basicInfo,
+                       hlpr_perception_msgs::OrientedBoundingBox &obb,
+                       hlpr_perception_msgs::ColorHist &hs,
+                       hlpr_perception_msgs::ShapeHist &sh,
+                       hlpr_perception_msgs::ViewpointHist &vph,
+                       hlpr_perception_msgs::OtherFeatures &other,
                         const pc_cluster_features &inObjFeatures);
 
 // Top-level message for planes
 void
-fillPlaneFeaturesMsg (nonplanar_feature_extraction::PlaneFeatures &planeRosMsg, 
-                      nonplanar_feature_extraction::BasicFeatures &basicInfo,
-                      nonplanar_feature_extraction::OrientedBoundingBox &obb,
+fillPlaneFeaturesMsg (hlpr_perception_msgs::PlaneFeatures &planeRosMsg, 
+                      hlpr_perception_msgs::BasicFeatures &basicInfo,
+                      hlpr_perception_msgs::OrientedBoundingBox &obb,
                       const pc_cluster_features &inObjFeatures);
 
 void
 objectPoseTF(geometry_msgs::Transform geom_transform);
 
 void
-getObjectMarker(visualization_msgs::Marker &marker, nonplanar_feature_extraction::ObjectFeatures &feats);
+getObjectMarker(visualization_msgs::Marker &marker, hlpr_perception_msgs::ObjectFeatures &feats);
 
 
 template<class pcType>

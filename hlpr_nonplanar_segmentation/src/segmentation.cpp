@@ -11,7 +11,7 @@
 #include <pcl/PCLPointCloud2.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include <nonplanar_segmentation/NonPlanarSegClusters.h>
+#include <hlpr_perception_msgs/NonPlanarSegClusters.h>
 //#include <utils_pcl_ros.hpp>
 
 #include <k2g.h>
@@ -132,9 +132,9 @@ main (int argc, char **argv)
   boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGB>> cloud;
 
   std::cout << "ros node initialized" << std::endl;
-  ros::init(argc, argv, "nonplanar_segmentation",ros::init_options::NoSigintHandler);
+  ros::init(argc, argv, "hlpr_nonplanar_segmentation",ros::init_options::NoSigintHandler);
   nh = new ros::NodeHandle("~");
-  //nh->getParam("nonplanar_segmentation/nv", viz_);
+  //nh->getParam("hlpr_nonplanar_segmentation/nv", viz_);
   //std::cout<<"viz is set to " << viz_ << endl;
 
   parsedArguments pA;
@@ -168,7 +168,7 @@ main (int argc, char **argv)
  //   clusterPub = nh->advertise<pcl::PointCloud<pcl::PointXYZRGB>>(clusterOutRostopic,5);
  //   normalPub = nh->advertise<pcl::PointCloud<pcl::Normal>>(normalOutRostopic,5);
     //planePub = nh->advertise<std_msgs::Float32MultiArray>(planeOutRostopic,5);
-    msgPub = nh->advertise<nonplanar_segmentation::NonPlanarSegClusters>(segOutRostopic,5);
+    msgPub = nh->advertise<hlpr_perception_msgs::NonPlanarSegClusters>(segOutRostopic,5);
  // }
 
   switch (pA.pc_source)
@@ -247,9 +247,9 @@ main (int argc, char **argv)
 		
     selected_cluster_index = multi_plane_app.processOnce(prev_cloud,clusters,clusterNormals,plane_coefficients, contours, pA.pre_proc, pA.merge_clusters, viz_, pA.filterNoise); //true is for the viewer
 
-			nonplanar_segmentation::NonPlanarSegClusters msg;
-      nonplanar_segmentation::SegClusters clusterMsg;              // Msg for object cluster
-      nonplanar_segmentation::SegPlanes planesMsg;                 // Msg for planes cluster
+			hlpr_perception_msgs::NonPlanarSegClusters msg;
+      hlpr_perception_msgs::SegClusters clusterMsg;              // Msg for object cluster
+      hlpr_perception_msgs::SegPlanes planesMsg;                 // Msg for planes cluster
 
 			msg.header.stamp = ros::Time::now();
 

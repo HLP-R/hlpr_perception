@@ -13,10 +13,10 @@
 #include <pcl/PCLPointCloud2.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
-#include <nonplanar_feature_extraction/PlaneFeatures.h>
-#include <nonplanar_feature_extraction/ObjectFeatures.h>
-#include <nonplanar_feature_extraction/ExtractedFeaturesArray.h>
-#include <nonplanar_segmentation/NonPlanarSegClusters.h>
+#include <hlpr_perception_msgs/PlaneFeatures.h>
+#include <hlpr_perception_msgs/ObjectFeatures.h>
+#include <hlpr_perception_msgs/ExtractedFeaturesArray.h>
+#include <hlpr_perception_msgs/NonPlanarSegClusters.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <utils_pcl_ros.hpp>
 
@@ -59,7 +59,7 @@ cluster_cb (const sensor_msgs::PointCloud2ConstPtr& cluster)
 }*/
 
 void
-cluster_cb (const nonplanar_segmentation::NonPlanarSegClusters& msg)
+cluster_cb (const hlpr_perception_msgs::NonPlanarSegClusters& msg)
 {
     clusters.clear();
     for(int i = 0; i < msg.segmentedClusters.clusters.size(); i++) {
@@ -130,7 +130,7 @@ main (int argc, char **argv)
   processor freenectprocessor = OPENGL;
 
   std::cout << "ros node initialized" << std::endl;
-  ros::init(argc, argv, "nonplanar_feature_extraction",ros::init_options::NoSigintHandler);
+  ros::init(argc, argv, "hlpr_nonplanar_feature_extraction",ros::init_options::NoSigintHandler);
   nh = new ros::NodeHandle("~");
   parsedArguments pA;
   if(parseArguments(argc, argv, pA, *nh) < 0)
@@ -156,7 +156,7 @@ main (int argc, char **argv)
   multi_plane_app.setWorkingVolumeThresholds(workSpace);
 
   std::cout << "Publishing ros topic: " << outRostopic << std::endl;
-  pub = nh->advertise<nonplanar_feature_extraction::ExtractedFeaturesArray>(outRostopic,5);
+  pub = nh->advertise<hlpr_perception_msgs::ExtractedFeaturesArray>(outRostopic,5);
   //transformPub = nh->advertise<geometry_msgs::Transform>(transformRostopic,5);
 
   std::cout << "Using ros topic as input" << std::endl;
@@ -203,18 +203,18 @@ main (int argc, char **argv)
     //std::cout << "Selected cluster angle (rad, deg): " << angle << " " << angle*180.0/3.14159 << std::endl;
     std::cout << "Selected cluster hue: " << feats[selected_cluster_index].hue << std::endl;
 
-    nonplanar_feature_extraction::ExtractedFeaturesArray rosMsg;
+    hlpr_perception_msgs::ExtractedFeaturesArray rosMsg;
     rosMsg.header.stamp = ros::Time::now();
 
     for(int i = 0; i < feats.size(); i++) {
-      nonplanar_feature_extraction::ObjectFeatures ft;
+      hlpr_perception_msgs::ObjectFeatures ft;
       fillRosMessageForObjects (ft, feats[i]);
       rosMsg.objects.push_back(ft); 
       rosMsg.transforms.push_back(ft.transform);
     }
 
     for(int i = 0; i < plane_feats.size(); i++){
-      nonplanar_feature_extraction::PlaneFeatures pft;
+      hlpr_perception_msgs::PlaneFeatures pft;
       fillRosMessageForPlanes(pft, plane_feats[i]);
       rosMsg.planes.push_back(pft);
     }
