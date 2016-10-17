@@ -19,11 +19,11 @@ find_package(PCL 1.8 REQUIRED COMPONENTS)
 find_package(freenect2 REQUIRED)
 find_package(OpenCV REQUIRED)
 
-add_message_files(
-  FILES
-  SegmentedClusters.msg
-  ClusterIndex.msg
-)
+#add_message_files(
+#  FILES
+#  SegmentedClusters.msg
+#  ClusterIndex.msg
+#)
 
 generate_messages(
   DEPENDENCIES

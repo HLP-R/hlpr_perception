@@ -17,7 +17,7 @@
 #include <pcl/point_types.h>
 #include <pcl/conversions.h>
 #include <pcl/io/openni_grabber.h>
-#include <hlpr_single_plane_segmentation/SegmentedClusters.h>
+#include <hlpr_perception_msgs/SegClusters.h>
 #include <k2g.h>
 #include <signal.h>
 #include <utils.hpp>
@@ -168,7 +168,7 @@ main (int argc, char **argv)
 
     float workSpace[] = {-0.55,0.5,-0.2,0.45,0.3,2.0};
     multi_plane_app.setWorkingVolumeThresholds(workSpace);
-    msgPub = nh->advertise<hlpr_single_plane_segmentation::SegmentedClusters>(segOutRostopic,5);
+    msgPub = nh->advertise<hlpr_perception_msgs::SegClusters>(segOutRostopic,5);
 
 
     switch (pA.pc_source)
@@ -247,11 +247,11 @@ main (int argc, char **argv)
                 selected_cluster_index = multi_plane_app.processOnce(prev_cloud,clusters,clusterNormals,plane,clusterIndicesStore,
                         pA.pre_proc,
                         pA.merge_clusters, viz_, pA.filterNoise); //true is for the viewer
-                hlpr_single_plane_segmentation::SegmentedClusters msg;
-                msg.header.stamp = ros::Time::now();
+                hlpr_perception_msgs::SegClusters msg;
+                //msg.header.stamp = ros::Time::now();
 
                 // Pull out the cluster indices and put in msg
-                for (int ti = 0; ti < clusterIndicesStore.size(); ti++){
+                /*for (int ti = 0; ti < clusterIndicesStore.size(); ti++){
                     hlpr_single_plane_segmentation::ClusterIndex cluster_idx_msg;
                     for (int j = 0; j < clusterIndicesStore[ti].size(); j++){
                         std_msgs::Int32 temp_msg;
@@ -260,7 +260,7 @@ main (int argc, char **argv)
                     }
                     msg.cluster_ids.push_back(cluster_idx_msg);
                     //clusterIndices.insert(clusterIndices.end(),clusterIndicesStore[ti].begin(), clusterIndicesStore[ti].end()); // For removing ALL cluster points
-                }
+                }*/
 
                 for(int i = 0; i < clusters.size(); i++) {
                     sensor_msgs::PointCloud2 out;
@@ -278,12 +278,12 @@ main (int argc, char **argv)
                     msg.normals.push_back(out);
                 }
 
-                std_msgs::Float32MultiArray planeMsg;
+                /*std_msgs::Float32MultiArray planeMsg;
                 planeMsg.data.clear();
                 for(int i = 0; i < 4; i++)
                     planeMsg.data.push_back(plane[i]);
                 //planePub.publish(planeMsg);
-                msg.plane = planeMsg;
+                msg.plane = planeMsg;*/
 
                 msgPub.publish(msg);
 
