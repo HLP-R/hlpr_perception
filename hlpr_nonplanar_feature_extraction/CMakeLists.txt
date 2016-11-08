@@ -40,6 +40,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 
 add_library(nonplanarftex SHARED src/cluster_processing.cpp src/rotcalipers.cpp src/utils.cpp src/utils_pcl_ros.cpp)
 target_link_libraries(nonplanarftex ${PCL_LIBRARIES} ${ROS_LIBRARIES})
+add_dependencies(nonplanarftex hlpr_perception_msgs_generate_messages_cpp)
 
 add_executable(nonplanar_ft_ex src/feature_extraction.cpp)
 #add_executable(listener src/listener.cpp src/nodes/listener_node.cpp)
