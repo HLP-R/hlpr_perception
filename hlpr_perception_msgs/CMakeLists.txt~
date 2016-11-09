@@ -16,7 +16,7 @@ add_message_files(
   NonPlanarSegClusters.msg
   SegClusters.msg
   SegPlanes.msg
-  ClusterIndex.msg
+
   # Feature extraction msgs
   BasicFeatures.msg
   ShapeHist.msg

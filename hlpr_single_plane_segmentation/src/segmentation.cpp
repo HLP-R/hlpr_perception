@@ -31,10 +31,10 @@ bool writePCD2File = false;
 char imageName[100];
 bool gotFirst = false;
 bool interrupt = false;
-const char *clusterOutRostopic = "/beliefs/clusters";
-const char *normalOutRostopic = "/beliefs/normals";
-const char *planeOutRostopic = "/beliefs/plane";
-const char *segOutRostopic = "/beliefs/clusters";
+const char *clusterOutRostopic = "/single_plane_seg/clusters";
+const char *normalOutRostopic = "/single_plane_seg/normals";
+const char *planeOutRostopic = "/single_plane_seg/plane";
+const char *segOutRostopic = "/single_plane_seg/clusters";
 bool viz_ = false;
 
     void
@@ -251,8 +251,8 @@ main (int argc, char **argv)
                 //msg.header.stamp = ros::Time::now();
 
                 // Pull out the cluster indices and put in msg
-                /*for (int ti = 0; ti < clusterIndicesStore.size(); ti++){
-                    hlpr_single_plane_segmentation::ClusterIndex cluster_idx_msg;
+               for (int ti = 0; ti < clusterIndicesStore.size(); ti++){
+                    hlpr_perception_msgs::ClusterIndex cluster_idx_msg;
                     for (int j = 0; j < clusterIndicesStore[ti].size(); j++){
                         std_msgs::Int32 temp_msg;
                         temp_msg.data = clusterIndicesStore[ti][j];
@@ -260,7 +260,7 @@ main (int argc, char **argv)
                     }
                     msg.cluster_ids.push_back(cluster_idx_msg);
                     //clusterIndices.insert(clusterIndices.end(),clusterIndicesStore[ti].begin(), clusterIndicesStore[ti].end()); // For removing ALL cluster points
-                }*/
+                }
 
                 for(int i = 0; i < clusters.size(); i++) {
                     sensor_msgs::PointCloud2 out;
@@ -278,22 +278,17 @@ main (int argc, char **argv)
                     msg.normals.push_back(out);
                 }
 
-                /*std_msgs::Float32MultiArray planeMsg;
+                std_msgs::Float32MultiArray planeMsg;
                 planeMsg.data.clear();
                 for(int i = 0; i < 4; i++)
                     planeMsg.data.push_back(plane[i]);
                 //planePub.publish(planeMsg);
-                msg.plane = planeMsg;*/
+                msg.plane = planeMsg;
 
                 msgPub.publish(msg);
+                clusterPub.publish(clusters[0]);
+                normalPub.publish(clusterNormals[0]);
 
-                /*clusterPub.publish(clusters[0]);
-                  normalPub.publish(clusterNormals[0]);
-                  std_msgs::Float32MultiArray planeMsg;
-                  planeMsg.data.clear();
-                  for(int i = 0; i < 4; i++)
-                  planeMsg.data.push_back(plane[i]);
-                  planePub.publish(planeMsg);*/
             }
 
             cloud_mutex.unlock();
