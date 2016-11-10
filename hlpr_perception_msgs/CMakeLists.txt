@@ -8,7 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
-find_package(PCL 1.8 REQUIRED COMPONENTS)
+find_package(PCL 1.7 REQUIRED COMPONENTS)
 
 add_message_files(
   FILES
