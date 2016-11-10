@@ -147,7 +147,7 @@ script:
   - ./change_pcl_version.sh
   - cd ~/catkin_ws
   - catkin_make $( [ -f $CATKIN_OPTIONS ] && cat $CATKIN_OPTIONS )
-  - catkin_make install
+  #- catkin_make install
   # Run the tests, ensuring the path is set correctly.
   - source devel/setup.bash
   - cd $CI_SOURCE_PATH
