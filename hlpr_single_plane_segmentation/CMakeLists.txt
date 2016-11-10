@@ -15,7 +15,7 @@ set(ROS_LIBRARIES /opt/ros/${ROS_DISTRO}/lib/libroscpp.so
 
 #find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure message_generation roscpp std_msgs geometry_msgs)
 find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs geometry_msgs sensor_msgs hlpr_perception_msgs)
-find_package(PCL 1.7 REQUIRED COMPONENTS)
+find_package(PCL 1.8 REQUIRED COMPONENTS)
 find_package(freenect2 REQUIRED)
 find_package(OpenCV REQUIRED)
 
