@@ -91,7 +91,7 @@ before_install:
   - sudo apt-get install libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
   - sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
   - git clone https://github.com/opencv/opencv.git
-  - cd ~/opencv
+  - cd opencv
   - mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/opencv && make && make install
   #- sudo apt-get install -y libeigen3-dev
   #- sudo apt-get install -y libflann-dev
