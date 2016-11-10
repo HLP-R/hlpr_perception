@@ -83,32 +83,10 @@ before_install:
   - cd .. && mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/freenect2 && make && make install
   - sudo ln -sf ~/freenect2/lib/cmake/freenect2/freenect2Config.cmake /usr/share/cmake-3.2/Modules/Findfreenect2.cmake
   # Specific to PCL
-  - sudo make -j2 install
   - sudo add-apt-repository ppa:v-launchpad-jochen-sprickerhof-de/pcl -y
   - sudo apt-get update -q
   - sudo apt-get install -y libpcl-all 
-  # PCL 1.8
-  - cd ../..
-  - git clone https://github.com/PointCloudLibrary/pcl.git
-  - cd pcl && mkdir build && cd build
-  - cmake ..
-  - make -j2
-  - sudo apt-get install g++ 
-  - sudo apt-get install doxygen   
-  - sudo apt-get install mpi-default-dev openmpi-bin openmpi-common   
-  - sudo apt-get install libflann1.8 libflann-dev 
-  - sudo apt-get install libeigen3-dev 
-  - sudo apt-get install libboost-all-dev 
-  - sudo apt-get install libvtk5.8-qt4 libvtk5.8 libvtk5-dev 
-  - sudo apt-get install libqhull* 
-  - sudo apt-get install libusb-dev 
-  - sudo apt-get install libgtest-dev 
-  - sudo apt-get install git-core freeglut3-dev pkg-config 
-  - sudo apt-get install build-essential libxmu-dev libxi-dev  
-  - sudo apt-get install libusb-1-0-dev graphviz mono-complete 
-  - sudo apt-get install qt-sdk openjdk-7-jdk openjdk-7-jre 
-  - sudo apt-get install phonon-backend-gstreamer 
-  - sudo apt-get install phonon-backend-vlc 
+  - sudo apt-get install ros-indigo-pcl-*
   # Specific to opencv
   - sudo apt-get install libopencv-dev python-opencv
   # ros msg
@@ -164,8 +142,8 @@ before_script:
 # failed). This is why we run both.
 script:
   - source /opt/ros/$ROS_DISTRO/setup.bash
-  #- cd $CI_SOURCE_PATH
-  #- ./change_pcl_version.sh
+  - cd $CI_SOURCE_PATH
+  - ./change_pcl_version.sh
   - cd ~/catkin_ws
   - catkin_make $( [ -f $CATKIN_OPTIONS ] && cat $CATKIN_OPTIONS )
   - catkin_make install
