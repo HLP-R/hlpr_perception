@@ -83,9 +83,16 @@ before_install:
   - cd .. && mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/freenect2 && make && make install
   - sudo ln -sf ~/freenect2/lib/cmake/freenect2/freenect2Config.cmake /usr/share/cmake-3.2/Modules/Findfreenect2.cmake
   # Specific to PCL
+  - cd ../..
   - sudo add-apt-repository ppa:v-launchpad-jochen-sprickerhof-de/pcl -y
   - sudo apt-get update -q
   - sudo apt-get install -y libpcl-all 
+  # Specific to opencv
+  - sudo apt-get install libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+  - sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
+  - git clone https://github.com/opencv/opencv.git
+  - cd ~/opencv
+  - mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/opencv && make && make install
   #- sudo apt-get install -y libeigen3-dev
   #- sudo apt-get install -y libflann-dev
   #- sudo apt-get install -y libpcap0.8  
