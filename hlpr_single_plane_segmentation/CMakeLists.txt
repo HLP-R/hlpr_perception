@@ -38,7 +38,7 @@ generate_messages(
 
 catkin_package(
  # CATKIN_DEPENDS dynamic_reconfigure message_runtime roscpp std_msgs geometry_msgs
- # CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs sensor_msgs
+ CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs sensor_msgs
 )
 
 include_directories(${PCL_INCLUDE_DIRS})
@@ -49,20 +49,20 @@ include_directories(${freenect2_INCLUDE_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-add_library(sgseg SHARED src/pc_segmentation.cpp src/utils.cpp)
-target_link_libraries(sgseg ${PCL_LIBRARIES} ${ROS_LIBRARIES})
+add_library(spseg SHARED src/pc_segmentation.cpp src/utils.cpp)
+target_link_libraries(spseg ${PCL_LIBRARIES} ${ROS_LIBRARIES})
 
-add_executable(sg_seg src/segmentation.cpp)
-target_link_libraries(sg_seg ${PCL_LIBRARIES} sgseg ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
+add_executable(sp_seg src/segmentation.cpp)
+target_link_libraries(sp_seg ${PCL_LIBRARIES} spseg ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
 
-add_dependencies(sg_seg hlpr_perception_msgs_generate_messages_cpp)
+add_dependencies(sp_seg hlpr_perception_msgs_generate_messages_cpp)
 
 install(DIRECTORY include/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.h"
 )
 
-install(TARGETS sg_seg
+install(TARGETS sp_seg
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

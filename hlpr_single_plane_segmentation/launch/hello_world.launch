@@ -5,7 +5,7 @@
   <arg name="segmentation/v" default="340" />
   <arg name="segmentation/src" default="2" />
 
-  <node pkg="hlpr_single_plane_segmentation" type="sg_seg" name="sg_seg" output="screen">
+  <node pkg="hlpr_single_plane_segmentation" type="sp_seg" name="sp_seg" output="screen">
     <param name="segmentation/nv" value="$(arg segmentation/nv)" />
     <param name="segmentation/rt" value="$(arg segmentation/rt)" />
     <param name="segmentation/src" value="$(arg segmentation/src)" />
