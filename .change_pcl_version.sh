@@ -1,4 +1,5 @@
 #!/bin/bash
+# This is meant to be used by travis build only, avoiding building pcl 1.8 
 files=$(find ./ -name 'CMakeLists.txt')
 for file in $files 
 do
