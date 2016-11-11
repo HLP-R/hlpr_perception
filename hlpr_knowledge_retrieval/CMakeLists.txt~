@@ -22,4 +22,6 @@ catkin_package(
   CATKIN_DEPENDS message_runtime std_msgs geometry_msgs sensor_msgs hlpr_feature_extraction
 )
 
-
+install(PROGRAMS src/object_knowledge_retrieval.py
+  DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION}
+)
