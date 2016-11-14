@@ -286,8 +286,8 @@ main (int argc, char **argv)
                 msg.plane = planeMsg;
 
                 msgPub.publish(msg);
-                clusterPub.publish(clusters[0]);
-                normalPub.publish(clusterNormals[0]);
+                //clusterPub.publish(clusters[0]);
+                //normalPub.publish(clusterNormals[0]);
 
             }
 
