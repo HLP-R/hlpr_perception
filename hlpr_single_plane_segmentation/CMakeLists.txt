@@ -25,12 +25,12 @@ find_package(OpenCV REQUIRED)
 #  ClusterIndex.msg
 #)
 
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  geometry_msgs
-  sensor_msgs
-)
+#generate_messages(
+#  DEPENDENCIES
+#  std_msgs
+#  geometry_msgs
+#  sensor_msgs
+#)
 
 #generate_dynamic_reconfigure_options(
 #  cfg/segmentation.cfg
@@ -38,7 +38,7 @@ generate_messages(
 
 catkin_package(
  # CATKIN_DEPENDS dynamic_reconfigure message_runtime roscpp std_msgs geometry_msgs
- CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs sensor_msgs
+ # CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs sensor_msgs
 )
 
 include_directories(${PCL_INCLUDE_DIRS})
