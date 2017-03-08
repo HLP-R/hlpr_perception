@@ -27,6 +27,8 @@ class lookup:
         fileref = get_param("data_file_location")
         if fileref is not None:
           self.filename = os.path.expanduser(fileref)
+	  self.readObjectKnowledge(self.filename)
+          print "Reading knowledge data from " + self.filename
         else:
           self.filename = None
         topicref = get_param("data_file_rostopic")

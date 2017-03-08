@@ -80,7 +80,7 @@ class filter:
 
 	#Initialize object feature values
         if self.initialized is False:
-          print "Reading object features from " + filename
+          print "Reading object features from " + self.filename
 	  self.loadObjects()
 	  self.initialized = True
 
