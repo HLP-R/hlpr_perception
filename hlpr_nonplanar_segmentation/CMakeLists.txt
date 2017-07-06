@@ -17,7 +17,7 @@ set(ROS_LIBRARIES /opt/ros/${ROS_DISTRO}/lib/libroscpp.so
 find_package(catkin REQUIRED COMPONENTS roscpp std_msgs geometry_msgs sensor_msgs hlpr_perception_msgs)
 find_package(PCL 1.8 REQUIRED COMPONENTS)
 find_package(freenect2 REQUIRED)
-find_package(OpenCV REQUIRED)
+find_package(OpenCV 3 REQUIRED)
 
 #generate_dynamic_reconfigure_options(
 #  cfg/segmentation.cfg
@@ -41,7 +41,7 @@ target_link_libraries(nonplanarseg ${PCL_LIBRARIES} ${ROS_LIBRARIES})
 add_executable(nonplanar_seg src/segmentation.cpp)
 #add_executable(listener src/listener.cpp src/nodes/listener_node.cpp)
 #target_link_libraries(pc_seg ${catkin_LIBRARIES} ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
-target_link_libraries(nonplanar_seg ${PCL_LIBRARIES} nonplanarseg ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(nonplanar_seg ${PCL_LIBRARIES} nonplanarseg ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBRARIES})
 
 #add_dependencies(pc_seg segmentation_gencfg segmentation_generate_messages_cpp)
 add_dependencies(nonplanar_seg hlpr_perception_msgs_generate_messages_cpp)
