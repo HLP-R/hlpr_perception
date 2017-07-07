@@ -17,7 +17,7 @@ set(ROS_LIBRARIES /opt/ros/${ROS_DISTRO}/lib/libroscpp.so
 find_package(catkin REQUIRED COMPONENTS roscpp std_msgs geometry_msgs sensor_msgs hlpr_perception_msgs)
 find_package(PCL 1.8 REQUIRED COMPONENTS)
 find_package(freenect2 REQUIRED)
-find_package(OpenCV 3 REQUIRED)
+find_package(OpenCV 2 REQUIRED)
 
 #generate_dynamic_reconfigure_options(
 #  cfg/segmentation.cfg
