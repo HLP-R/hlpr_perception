@@ -17,6 +17,13 @@ set(ROS_LIBRARIES /opt/ros/${ROS_DISTRO}/lib/libroscpp.so
 
 
 #find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure message_generation roscpp std_msgs geometry_msgs)
+find_package(OpenCL QUIET)
+IF(OpenCL_FOUND)
+	SET(LIBRARIES
+		${OpenCL_LIBRARIES}
+		${LIBRARIES}
+	)
+ENDIF(OpenCL_FOUND)
 find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs geometry_msgs tf2_ros hlpr_segmentation)
 find_package(PCL 1.8 REQUIRED COMPONENTS)
 find_package(freenect2 REQUIRED)
