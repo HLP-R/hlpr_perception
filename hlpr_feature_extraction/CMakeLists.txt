@@ -27,7 +27,7 @@ ENDIF(OpenCL_FOUND)
 find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs geometry_msgs tf2_ros hlpr_segmentation)
 find_package(PCL 1.8 REQUIRED COMPONENTS)
 find_package(freenect2 REQUIRED)
-find_package(OpenCV REQUIRED)
+find_package(OpenCV 2 REQUIRED)
 
 add_message_files(
   FILES
