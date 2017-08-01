@@ -27,6 +27,20 @@ find_package(PCL 1.7 REQUIRED COMPONENTS)
 find_package(freenect2 REQUIRED)
 find_package(OpenCV 2 REQUIRED)
 
+add_message_files(
+  FILES
+  SegmentedClusters.msg
+  ClusterIndex.msg
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
+  sensor_msgs
+)
+
+
 #generate_dynamic_reconfigure_options(
 #  cfg/segmentation.cfg
 #)
@@ -53,7 +67,7 @@ add_executable(pc_seg src/segmentation.cpp)
 target_link_libraries(pc_seg ${PCL_LIBRARIES} pcseg ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
 
 #add_dependencies(pc_seg segmentation_gencfg segmentation_generate_messages_cpp)
-add_dependencies(pc_seg hlpr_perception_msgs_generate_messages_cpp)
+add_dependencies(pc_seg segmentation_generate_messages_cpp hlpr_perception_msgs_generate_messages_cpp)
 
 
 #install(DIRECTORY include/${PROJECT_NAME}/
