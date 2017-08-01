@@ -16,11 +16,11 @@ generate_messages(
   std_msgs
   geometry_msgs
   sensor_msgs
-  hlpr_feature_extraction
+  hlpr_perception_msgs
 )
 
 catkin_package(
-  CATKIN_DEPENDS message_runtime std_msgs geometry_msgs sensor_msgs hlpr_feature_extraction
+  CATKIN_DEPENDS message_runtime std_msgs geometry_msgs sensor_msgs hlpr_perception_msgs
 )
 
 

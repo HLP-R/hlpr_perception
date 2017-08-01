@@ -1,3 +1,3 @@
 Header header
-hlpr_feature_extraction/PcFeatures[] objects
+hlpr_perception_msgs/ObjectFeatures[] objects
 std_msgs/String[] labels
