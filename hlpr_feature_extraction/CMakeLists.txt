@@ -17,23 +17,10 @@ set(ROS_LIBRARIES /opt/ros/${ROS_DISTRO}/lib/libroscpp.so
 
 
 #find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure message_generation roscpp std_msgs geometry_msgs)
-find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs geometry_msgs tf2_ros hlpr_segmentation)
+find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs geometry_msgs tf2_ros hlpr_perception_msgs)
 find_package(PCL 1.8 REQUIRED COMPONENTS)
 find_package(freenect2 REQUIRED)
 find_package(OpenCV 2 REQUIRED)
-
-add_message_files(
-  FILES
-  PcFeatures.msg
-  PcFeatureArray.msg
-)
-
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  geometry_msgs
-  hlpr_segmentation
-)
 
 #generate_dynamic_reconfigure_options(
 #  cfg/segmentation.cfg
@@ -41,7 +28,7 @@ generate_messages(
 
 catkin_package(
  # CATKIN_DEPENDS dynamic_reconfigure message_runtime roscpp std_msgs geometry_msgs
-  CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs hlpr_segmentation
+  CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs hlpr_perception_msgs
 )
 
 include_directories(${PCL_INCLUDE_DIRS})
@@ -54,13 +41,13 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 
 add_library(ftex SHARED src/cluster_processing.cpp src/rotcalipers.cpp src/utils.cpp src/utils_pcl_ros.cpp)
 target_link_libraries(ftex ${PCL_LIBRARIES} ${ROS_LIBRARIES})
-add_dependencies(ftex hlpr_feature_extraction_generate_messages_cpp)
+add_dependencies(ftex hlpr_perception_msgs_generate_messages_cpp)
 
 add_executable(ft_ex src/feature_extraction.cpp)
 #add_executable(listener src/listener.cpp src/nodes/listener_node.cpp)
 #target_link_libraries(pc_seg ${catkin_LIBRARIES} ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries(ft_ex ${PCL_LIBRARIES} ftex ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
-add_dependencies(ft_ex hlpr_feature_extraction_generate_messages_cpp)
+add_dependencies(ft_ex hlpr_perception_msgs_generate_messages_cpp)
 
 #add_dependencies(pc_seg segmentation_gencfg segmentation_generate_messages_cpp)
 

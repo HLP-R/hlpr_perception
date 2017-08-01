@@ -8,6 +8,8 @@
 #define OBJECTFEATURES_HPP_
 
 #include<common.hpp>
+#include <vector>
+#include <cmath>
 
 #include<misc_structures.hpp>
 #include<utils.hpp>
@@ -22,9 +24,9 @@
 #include<pcl/common/transforms.h>
 #include<pcl/ModelCoefficients.h>
 #include<pcl/filters/project_inliers.h>
+#include <pcl/features/moment_of_inertia_estimation.h>
 
 //use eigen data structures?
-
 
 class pc_cluster_features
 {
@@ -36,46 +38,67 @@ private:
 
 }
 
-  void boundingBoxWithZ(pcl::PointCloud<PointT> &cluster)
+  // Added by Priyanka - for non-planar segmentation
+  void orientedBoundingBox(pcl::PointCloud<PointT> &cluster)
   {
-    pcl::PointCloud<PointT>::Ptr projected_cluster = cluster.makeShared();
-    for(size_t j = 0; j < projected_cluster->points.size(); j++)
-      projected_cluster->points[j].z = 1;
+      pcl::PointCloud<PointT>::Ptr projected_cluster = cluster.makeShared();
+      volume2 = cluster.size();
+      pcl::getMinMax3D(cluster, min, max);
+      
+      std::vector <float> moment_of_inertia;
+      std::vector <float> eccentricity;
+      pcl::PointXYZ min_point_OBB;
+      pcl::PointXYZ max_point_OBB;
+      pcl::PointXYZ position_OBB;
+      Eigen::Matrix3f rotational_matrix_OBB;
+      //Eigen::Vector3f major_vector, middle_vector, minor_vector;
 
-     volume2 = cluster.size();
+      pcl::PointCloud<PointT>::Ptr cluster_xyzrgb (projected_cluster);
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+      pcl::copyPointCloud(*cluster_xyzrgb, *cloud);
+      pcl::MomentOfInertiaEstimation <pcl::PointXYZ> feature_extractor;
+      feature_extractor.setInputCloud(cloud);
+      feature_extractor.compute();
+  
+      //feature_extractor.getMomentOfInertia (moment_of_inertia);
+      //feature_extractor.getEccentricity (eccentricity);
+      feature_extractor.getOBB(min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
+      //feature_extractor.getEigenValues(major_value, middle_value, minor_value);
+      //feature_extractor.getEigenVectors(major_vector, middle_vector, minor_vector);
+      //feature_extractor.getMassCenter(mass_center);
 
-     pcl::getMinMax3D(cluster, min, max);
-     aligned_bounding_box = minAreaRect(projected_cluster);
-     aligned_bounding_box.center.z = min[2]+(max[2]-min[2])/2; //this should be maxheight/2+planeHeight
-     aligned_bounding_box.size.zSize = fabs((float)(max[2]-min[2])); //this should be max height!
+      // Fill up the Box3D structure
+      Eigen::Vector3f position (position_OBB.x, position_OBB.y, position_OBB.z);
+      oriented_bounding_box.center.x = position(0);
+      oriented_bounding_box.center.y = position(1);
+      oriented_bounding_box.center.z = position(2);
 
-     aligned_bounding_box.fillQuatGivenAxisAngle();
-  }
+      std::cout<<"Center of OBB: ("<< position(0) <<", "<<position(1)<<", "<<position(2)<<")"<<std::endl; 
+
+      Eigen::Quaternion<float> quat (rotational_matrix_OBB);
+      oriented_bounding_box.rot_quat[0] = quat.x();
+	    oriented_bounding_box.rot_quat[1] = quat.y();
+	    oriented_bounding_box.rot_quat[2] = quat.z();
+      oriented_bounding_box.rot_quat[3] = quat.w();
+
+      oriented_bounding_box.size.xSize = max_point_OBB.x - min_point_OBB.x;
+      std::cout<<"xSize : "<<oriented_bounding_box.size.xSize<<std::endl;
+      oriented_bounding_box.size.ySize = max_point_OBB.y - min_point_OBB.y;
+      std::cout<<"ySize : "<<oriented_bounding_box.size.ySize<<std::endl;
+      oriented_bounding_box.size.zSize = max_point_OBB.z - min_point_OBB.z;
+      std::cout<<"zSize : "<<oriented_bounding_box.size.zSize<<std::endl;
+   } 
 
   void boundingBoxWithCoeff(pcl::PointCloud<PointT> &cluster, pcl::ModelCoefficients::Ptr coefficients)
   {
     pcl::PointCloud<PointT>::Ptr projected_cluster = cluster.makeShared();
-
     pcl::PointCloud<PointT>::Ptr cloud_transformed (new pcl::PointCloud<PointT>);
-
-    /*pcl::PointCloud<PointT>::Ptr cloud_projected (new pcl::PointCloud<PointT>);
-    pcl::ProjectInliers<PointT> proj;
-    proj.setModelType (pcl::SACMODEL_PLANE);
-    proj.setInputCloud (cluster.makeShared());
-    proj.setModelCoefficients (coefficients);
-    proj.filter (*cloud_projected);*/
 
     Eigen::Vector3f z_axis(0,0,1);
     Eigen::Vector3f plane_normal(coefficients->values[0],coefficients->values[1],coefficients->values[2]);
-//    Eigen::Vector3f plane_normal(0.0270649, 0.849503, 0.526889);
-
     plane_normal.normalize();
-
     Eigen::Vector3f c = plane_normal.cross(z_axis);//z_axis.cross(plane_normal);
-	c.normalize();
-
-    //std::cout << c << std::endl;
-    //std::cout << plane_normal << std::endl << std::endl;
+        c.normalize();
 
     double cost  = plane_normal.dot(z_axis);
     double half_theta = acos(cost)/2;
@@ -86,55 +109,64 @@ private:
     Eigen::Affine3f T = Eigen::Affine3f::Identity();
     T.rotate(R);
 
-    //std::cout << q.w() << " " << q.x() << " " <<  q.y() << " " << q.z() << " " << std::endl;
-
     pcl::transformPointCloud (*projected_cluster, *cloud_transformed, T);
 
     volume2 = cluster.size();
     pcl::getMinMax3D(*cloud_transformed, min, max);
 
     for(size_t j = 0; j < cloud_transformed->points.size(); j++)
-    	cloud_transformed->points[j].z = 1;
+        cloud_transformed->points[j].z = 1;
 
-    aligned_bounding_box = minAreaRect(cloud_transformed);
-
-
-    Eigen::Quaternion<float> q2(cos(-aligned_bounding_box.angle/2), 0, 0, sin(-aligned_bounding_box.angle/2));
+    oriented_bounding_box = minAreaRect(cloud_transformed);
+    Eigen::Quaternion<float> q2(cos(-oriented_bounding_box.angle/2), 0, 0, sin(-oriented_bounding_box.angle/2));
     Eigen::Quaternion<float> q3 = q2*q;
     q3 = q3.inverse();
 
-    //pcl::getMinMax3D(cluster, min, max);
-    //aligned_bounding_box = minAreaRect(projected_cluster);
+    oriented_bounding_box.center.z = min[2]+(max[2]-min[2])/2; //this should be maxheight/2+planeHeight
+    oriented_bounding_box.size.zSize = fabs((float)(max[2]-min[2])); //this should be max height!
 
-    /*for(int i = 0; i< 3 ; i++)
-      aligned_bounding_box.rot_axis[i] = c[i];
-    aligned_bounding_box.fillQuatGivenAxisAngle();*/
-
-    aligned_bounding_box.center.z = min[2]+(max[2]-min[2])/2; //this should be maxheight/2+planeHeight
-    aligned_bounding_box.size.zSize = fabs((float)(max[2]-min[2])); //this should be max height!
-
-    Eigen::Vector3f X(aligned_bounding_box.center.x,aligned_bounding_box.center.y,aligned_bounding_box.center.z);
+    Eigen::Vector3f X(oriented_bounding_box.center.x,oriented_bounding_box.center.y,oriented_bounding_box.center.z);
     Eigen::Vector3f Y(0,0,0);
 
     Y = T.inverse()*X;
 
-    aligned_bounding_box.center.x = Y.x();
-    aligned_bounding_box.center.y = Y.y();
-    aligned_bounding_box.center.z = Y.z();
+    oriented_bounding_box.center.x = Y.x();
+    oriented_bounding_box.center.y = Y.y();
+    oriented_bounding_box.center.z = Y.z();
+    oriented_bounding_box.rot_quat[0] = q3.x();
+        oriented_bounding_box.rot_quat[1] = q3.y();
+        oriented_bounding_box.rot_quat[2] = q3.z();
+    oriented_bounding_box.rot_quat[3] = q3.w();
+  }
 
-    /*for(int i = 0; i < 3; i++)
-        aligned_bounding_box.rot_axis[i] = c[i];//coefficients->values[i];
+  // Added by Priyanka - for planes
+  void planeConst(pcl::PointCloud<PointT> &contour)
+  {
+     plane_cloud = contour.makeShared();
 
-    aligned_bounding_box.angle = //half_theta*2;
+     float r = 0.0f;
+     float g = 0.0f;
+     float b = 0.0f;
+     float n = static_cast<float> (contour.size());
+     for (size_t j = 0; j < n; j++)
+     {
+      r += (float) (contour[j].r);
+      g += (float) (contour[j].g);
+      b += (float) (contour[j].b);
+     }
+     r /= n; g /= n; b /= n;
 
-    aligned_bounding_box.fillQuatGivenAxisAngle();*/
+     hue = rgb2hue(r,g,b);
 
-    aligned_bounding_box.rot_quat[0] = q3.x();
-	aligned_bounding_box.rot_quat[1] = q3.y();
-	aligned_bounding_box.rot_quat[2] = q3.z();
-    aligned_bounding_box.rot_quat[3] = q3.w();
+     //std::cout << rgb2hue(r,g,b) << endl;
 
+     int ri = r; int gi = (int)g; int bi = (int)b;
 
+     color[0] = (unsigned char) ri;
+     color[1] = (unsigned char) gi;
+     color[2] = (unsigned char) bi;
+
+     fill();
   }
 
   void clusterConst(pcl::PointCloud<PointT> &cluster)
@@ -186,7 +218,9 @@ public:
 
     pcl::compute3DCentroid(cluster, centroid);
 
-    boundingBoxWithZ(cluster);
+    orientedBoundingBox(cluster); // Changed by Priyanka for non-planar segmentation
+
+    //boundingBoxWithZ(cluster);
 
     //BARIS: PROJECT HERE
 //        pcl::transformPointCloud (cluster, *projected_cluster, plane_transformation);
@@ -202,8 +236,8 @@ public:
 //          projected_cluster->points[j].z = 1;
 
     clusterConst(cluster);
-
   }
+
   pc_cluster_features(pcl::PointCloud<PointT> &cluster, Eigen::Vector4f &used_plane_model)
    {
      defaultConst();
@@ -225,18 +259,31 @@ public:
      if(zero_count > 3)
        use_projection = false;
 
-     if(use_projection)
+     //if(use_projection)
        boundingBoxWithCoeff(cluster, coefficients);
-     else
-       boundingBoxWithZ(cluster);
+     //else
+     //  boundingBoxWithZ(cluster);
 
      clusterConst(cluster);
 
    }
 
+  pc_cluster_features(pcl::PointCloud<PointT>::Ptr &contour){
+    defaultConst();
+
+    pcl::compute3DCentroid(*contour, centroid);
+
+    orientedBoundingBox(*contour);
+
+    planeConst(*contour);
+
+    orientedBoundingBox(*contour);
+  }
+
   ~pc_cluster_features(){}
 
-  Box3D aligned_bounding_box;
+  //Box3D aligned_bounding_box;     
+  Box3D oriented_bounding_box;
   //Box3D aligned_bounding_box2;
 
   //FEATURES
@@ -248,7 +295,7 @@ public:
   //Eigen::Vector3f color;
   ColorVec color;
   float hue;
-
+ 
   Eigen::Vector4f centroid;
   Eigen::Quaternionf rotation_quat; // kind of hard to get full orientation, need to fit a box which is not trivial! n^3, needs 3d convez hull and hard to implement, approximations exist
 
@@ -257,7 +304,7 @@ public:
 
   //assuming on table, coming from the bounding box
   float bb_aspect_ratio;
-  float bb_orientation; //wrt to the table, use a complex number?
+  //float bb_orientation; //wrt to the table, use a complex number?
 
   float compactness; // volume/bb_volume need a better name?
   float av_ratio;   //  area/volume
@@ -268,24 +315,46 @@ public:
   float objectBuffer[5000];
 
   pcl::PointCloud<PointT>::Ptr cloud;
+  pcl::PointCloud<PointT>::Ptr plane_cloud;
   pcl::PointCloud<PointT>::Ptr parent_cloud;
   pcl::PointIndices indices; //indices in the parent point cloud
   pcl::PointCloud<pcl::Normal> normals;
+  
+  bool setViewpointHist = true;                // boolean to check if viewpoint Histogram is being computed and set (Default - true)
   pcl::PointCloud<pcl::VFHSignature308> vfhs;// (new pcl::PointCloud<pcl::VFHSignature308> ());
+  
+  bool setShapeHist = true;                   // boolean to check if shape histogram is being computed and set (Default - true)
+  pcl::PointCloud<pcl::VFHSignature308> cvfhs; // (new pcl::PointCloud<pcl::VFHSignature308> ());
+  pcl::PointCloud<pcl::FPFHSignature33> fpfhs; //(new pcl::PointCloud<pcl::FPFHSignature33> ());
+  
+  // Normalized cvfh feature vector?
+  //std::vector<double> histogram_cvfh_vector (308);
+  
+  // Normalized fpfh feature vector?
+  //std::vector<double> histogram_fpfh_vector (308); 
+  
+  // Normalized hue-saturation histogram
+  bool setColorHist = true;              // boolean to check if color Histogram is being computed and set (Default - true)
+  std::vector<double> histogram_hs;
 
+  // Other features (default is set to false)
+  bool setOtherFeatures = false;
+  std::vector<double> otherFeatures;               // Vector to store the other features
+  
   //Image based features??? blob features, color histogram? using opencv
 
   void fill()
   {
-    aligned_bounding_box.calculateProperties();
+    oriented_bounding_box.calculateProperties();
     //aligned_bounding_box.fillQuatGivenAxisAngle();
 
-    bb_orientation = aligned_bounding_box.angle;
-    bb_volume = aligned_bounding_box.volume;
-    bb_area = aligned_bounding_box.area;
-    bb_aspect_ratio = aligned_bounding_box.aspect_ratio;
-    rotation_quat = Eigen::Quaternionf(aligned_bounding_box.rot_quat);
-
+    //bb_orientation = aligned_bounding_box.angle;
+    bb_volume = oriented_bounding_box.volume;
+    bb_area = oriented_bounding_box.area;
+    bb_aspect_ratio = oriented_bounding_box.aspect_ratio;
+    rotation_quat = Eigen::Quaternionf(oriented_bounding_box.rot_quat);
+  
+    //NOTE: compactness is not valid for planes
     compactness = (float)bb_volume/volume2;
     //where is the real area/real volume?
     av_ratio = bb_area/bb_volume;
@@ -299,10 +368,10 @@ public:
 
     out_features[feature_counter++] = numFeatures;
 
-    out_features[feature_counter++] = aligned_bounding_box.center.x;
-    out_features[feature_counter++] = aligned_bounding_box.center.y;
-    out_features[feature_counter++] = aligned_bounding_box.center.z;
-    out_features[feature_counter++] = aligned_bounding_box.angle;
+    out_features[feature_counter++] = oriented_bounding_box.center.x;
+    out_features[feature_counter++] = oriented_bounding_box.center.y;
+    out_features[feature_counter++] = oriented_bounding_box.center.z;
+    //out_features[feature_counter++] = oriented_bounding_box.angle;
 
     for(int i = 0;i<3;feature_counter++,i++)
       out_features[feature_counter] = centroid[i];
@@ -320,9 +389,9 @@ public:
 
     out_features[feature_counter++] = volume2;
 
-    out_features[feature_counter++] = aligned_bounding_box.size.xSize;
-    out_features[feature_counter++] = aligned_bounding_box.size.ySize;
-    out_features[feature_counter++] = aligned_bounding_box.size.zSize;
+    out_features[feature_counter++] = oriented_bounding_box.size.xSize;
+    out_features[feature_counter++] = oriented_bounding_box.size.ySize;
+    out_features[feature_counter++] = oriented_bounding_box.size.zSize;
 
     out_features[feature_counter++] = bb_volume;
     out_features[feature_counter++] = bb_area;
@@ -400,5 +469,195 @@ for(size_t j = 0; j < projected_cluster->points.size(); j++)
 	projected_cluster->points[j].z = projected_cluster->points[j].z - coefficients->values[2]*t;
 }*/
 
+typedef pcl::PointCloud<PointT> PointCloudT;
+typedef unsigned int uint;
+
+// Histogram of hue and saturation
+class HSHistogram{      
+	private:
+		int dim;
+	public:
+		HSHistogram(int dim):dim(dim){ }         // empty constructor -> just sets the dimension of the histogram
+		
+	void computeHistogram(PointCloudT &cloud, std::vector<std::vector<uint> > &hist2, std::vector<double> &hist2_double_vector){
+		int cloud_size = cloud.points.size();
+		
+		for(int i = 0; i < cloud_size; i++){
+            int r = (int)(double)(cloud.points[i].r);
+            int g = (int)(double)(cloud.points[i].g);
+            int b = (int)(double)(cloud.points[i].b);
+            
+            // convert the rgb value to HS value
+            std::pair<double, double> HS = rgb2hue(r,g,b);
+            //std::cout<<"Value of hue: "<<std::get<0>(HS)<< "    sat: "<<std::get<1>(HS)<<std::endl;
+            
+			// Get the HS bins
+			double round = (double)360 / dim;              // As the range of Hue is from 0-359
+			int h = (int) (std::get<0>(HS) / round);       // Get a bin for hue from 0-15
+			int s = (int) (std::get<1>(HS) * (dim-1));     // Get a bin for saturation from 0-15
+			
+			//std::cout<<"Value of h: "<<h<< "    s: "<<s<<std::endl;
+            hist2[h][s] = hist2[h][s]+1;
+            
+            //std::cout<<"\tValue after updating: "<<hist2[h][s] << " ";
+            //std::cout<< h << " " << s << std::endl;
+		}
+		
+	   // Convert to a double vector
+        for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
+				hist2_double_vector[i * dim + j] = hist2[i][j];
+            }
+        }
+        
+        for (int i = 0; i < hist2_double_vector.size(); i++) {
+            hist2_double_vector[i] /= (double) cloud_size;
+        }
+	}
+		
+	std::pair<double, double> rgb2hue(int r, int g, int b){
+	  const unsigned char max = std::max (r, std::max (g, b));
+	  const unsigned char min = std::min (r, std::min (g, b));
+
+	  float hue;
+	  float sat;
+
+	  const float diff = static_cast <float> (max - min);
+
+	  if (max == 0) // division by zero
+	  {
+		sat = 0;
+		//hue undefined! set to your favorite value (any value with zero saturation will produce black)
+		hue = 0;
+	  }
+	  else
+	  {
+		sat = diff/max;
+
+		if (min == max) // diff == 0 -> division by zero
+		{
+		 sat = 0;
+		 //hue undefined! set to your favorite value (black)
+		 hue = 0;
+		}
+		else
+		{
+		  if      (max == r) hue = 60.f * (      static_cast <float> (g - b) / diff);
+		  else if (max == g) hue = 60.f * (2.f + static_cast <float> (b - r) / diff);
+		  else    hue = 60.f * (4.f + static_cast <float> (r - g) / diff); // max == b
+
+		  if (hue < 0.f) hue += 360.f;
+		}
+	  }
+
+	  //if (sat < ridiculous_global_variables::saturation_threshold && ridiculous_global_variables::ignore_low_sat)
+		//hue = ridiculous_global_variables::saturation_mapped_value; //hackzz oh the hackz
+		
+		// Return both hue and saturation as a pair
+		std::pair <double, double> returnHS = std::make_pair(hue,sat);
+
+	  return returnHS;
+	}
+};
+
+// Helper class to help with colour histograms
+/*class ColorHistogram {
+  private:
+    //std::vector<std::vector<std::vector<uint> > > hist3;
+    int dim;
+  public:
+    /*ColorHistogram(int dim):dim(dim) {
+        cloud_size = 0;
+        hist3.resize(dim);
+        for (int i = 0; i < dim; i++) {
+            hist3[i].resize(dim);
+            for (int j = 0; j < dim; j++) {
+                hist3[i][j].resize(dim);
+                std::fill( hist3[i][j].begin(), hist3[i][j].end(), 0 );
+            }
+        }
+    }*/
+    
+    //ColorHistogram(int dim):dim(dim){ }  // empty constructor
+
+  /*void computeHistogram(PointCloudT &cloud, std::vector<std::vector<std::vector<uint> > > &hist3, std::vector<double> &hist3_double_vector) {
+        //ROS_INFO("Computing color histogram...");
+        int cloud_size = cloud.points.size();
+        for (int i = 0; i < cloud_size; i++) {
+            // Max value of 255. We want 256 because we want the rgb division to result in
+            // a value always slightly smaller than the dim due to index starting from 0
+            double round = (double)256 / dim;
+            int r = (int)((double)(cloud.points[i].r) / round);
+            int g = (int)((double)(cloud.points[i].g) / round);
+            int b = (int)((double)(cloud.points[i].b) / round);
+            
+            //std::cout<<"\nValue before updating: "<<hist3[r][g][b];
+            
+            hist3[r][g][b] = hist3[r][g][b]+1;
+            
+            //std::cout<<"\tValue after updating: "<<hist3[r][g][b] << " ";
+            //std::cout<< r << " " << g << " " << b << " "  << std::endl;
+            /*if (i==cloud_size-1)
+            {
+				//std::cout << hist3.size()
+				std::cout<<"Value before exit:" << hist3[33][0][1] << " ";
+			}*/
+        /*}
+        
+        std::cout<<"\t\tRandom value:" << hist3[33][0][1] << " ";
+        
+        // Convert to a double vector
+        std::cout<<"Dim: "<<dim;
+        int i_offset = dim * dim;
+        int j_offset = dim;
+       
+        /*for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
+                for (int k = 0; k < dim; k++) {
+                    hist3_double_vector[i * i_offset + j * j_offset + k] = hist3[i][j][k];
+                    //std::cout <<"\nValue of hist3: "<<hist3[i][j][k]; 
+                    if (i == 33 && j == 0 && k == 1)
+                    {
+						std::cout <<"\nValue of hist3: "<< hist3[i][j][k] << " and the vector " << hist3_double_vector[i * i_offset + j * j_offset + k] <<std::endl;
+					}
+                }
+            }
+        }
+        
+        /*for (int i = 0; i < hist3_double_vector.size(); i++) {
+            hist3_double_vector[i] /= (double) cloud_size;
+            //hist3_double_vector[i] = 1.;
+        }*/
+        //return hist3_double_vector;
+    //}
+    
+    /*
+    uint get(int r, int g, int b) {
+        return hist3[r][g][b];
+    }
+    
+    std::vector<double> toDoubleVector() {
+        int i_offset = dim * dim;
+        int j_offset = dim;
+        std::vector<double> hist3_double_vector (dim * dim * dim, 0);
+        for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
+                for (int k = 0; k < dim; k++) {
+                    hist3_double_vector[i * i_offset + j * j_offset + k] = hist3[i][j][k];
+                    std::cout <<"\nValue of hist3: "<<hist3[i][j][k]; 
+                }
+            }
+        }
+        return hist3_double_vector;
+    }
+    
+    std::vector<double> toDoubleVectorNormalized() {
+        std::vector<double> hist_double_vector = toDoubleVector();
+        for (int i = 0; i < hist_double_vector.size(); i++) {
+            hist_double_vector[i] /= cloud_size;
+        }
+        return hist_double_vector;
+    }*/
+//};
 #endif /* OBJECTFEATURES_HPP_ */
 
