@@ -11,8 +11,7 @@ import pdb
 import tf
 import itertools
 from Tkinter import *
-from hlpr_feature_extraction.msg import PcFeatureArray
-from hlpr_object_labeling.msg import LabeledObjects
+from hlpr_perception_msgs.msg import ObjectFeatures, ExtractedFeaturesArray, LabeledObjects
 from std_msgs.msg import String
 
 pf = None
@@ -52,7 +51,7 @@ class filter:
 	if topicref is not None:
     	  self.rostopic = os.path.expanduser(topicref)
           self.fileSub = rospy.Subscriber(self.rostopic, String, self.cbFile, queue_size = 1)
-        self.subscriber = rospy.Subscriber("/beliefs/features", PcFeatureArray, self.cbClusters, queue_size = 1)
+        self.subscriber = rospy.Subscriber("/beliefs/features", ExtractedFeaturesArray, self.cbClusters, queue_size = 1)
 	self.pauseSub = rospy.Subscriber("/pause_labeling", String, self.cbPause, queue_size = 1)
 	self.orderPub = rospy.Publisher("/beliefs/labels", LabeledObjects, queue_size = 1)
 
@@ -136,9 +135,9 @@ class filter:
 	  
     def hsvDiff(self, c1,c2):
       	hsv1 = c1[1:4]
-      	r2 = c2.rgba_color.r
-      	g2 = c2.rgba_color.g
-      	b2 = c2.rgba_color.b
+      	r2 = c2.basicInfo.rgba_color.r
+      	g2 = c2.basicInfo.rgba_color.g
+      	b2 = c2.basicInfo.rgba_color.b
    	hsv2 = cv2.cvtColor(np.array([[(r2,g2,b2)]],dtype='float32'), cv2.COLOR_RGB2HSV)
 	h1 = hsv2[0][0][0]
 	h2 = float(hsv1[0])
@@ -147,7 +146,7 @@ class filter:
     	return abs(huediff), abs(hsv2[0][0][1]-float(hsv1[1])), abs(hsv2[0][0][2]-float(hsv1[2]))
 
     def sizeDiff(self, c1,c2):
-    	size = c2.bb_dims.x * c2.bb_dims.y
+    	size = c2.obb.bb_dims.x * c2.obb.bb_dims.y
     	return abs(size - float(c1[4]))
 
     def calculateError(self, init, cluster):
@@ -223,9 +222,10 @@ class ui:
 	    return
 	self.canvas.delete("all")
 	for idx in range(0,len(clusters)):
-	    c = clusters[idx]
-	    if c is None:
+	    cluster = clusters[idx]
+	    if cluster is None:
 		continue
+	    c = cluster.basicInfo
 	    pts = [(c.points_min.x,c.points_min.y),(c.points_min.x,c.points_max.y),(c.points_max.x,c.points_max.y),(c.points_max.x,c.points_min.y)]
 	    offset = complex(c.points_centroid.x,c.points_centroid.y)
 	    cangle = 0 # cmath.exp(c.angle*1j)

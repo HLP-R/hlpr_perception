@@ -9,7 +9,7 @@ import roslib
 import rospy
 import pdb
 from Tkinter import *
-from hlpr_feature_extraction.msg import PcFeatureArray
+from hlpr_perception_msgs.msg import ExtractedFeaturesArray
 
 pf = None
 display = None
@@ -27,7 +27,7 @@ def get_param(name, value=None):
 class filter:
     def __init__(self):
 	rospy.init_node('tracker', anonymous=True)
-        self.subscriber = rospy.Subscriber("/beliefs/features", PcFeatureArray, self.cbClusters, queue_size = 1)
+        self.subscriber = rospy.Subscriber("/beliefs/features", ExtractedFeaturesArray, self.cbClusters, queue_size = 1)
 	self.initialized = False
 	self.labeled = False
 	self.labeledIdx = 0
@@ -44,11 +44,11 @@ class filter:
 	    return
         if self.initialized is False:
 	    self.initX = []
-	    for c in clusters:
-		size = c.bb_dims.x * c.bb_dims.y
+	    for cluster in clusters:
+		size = cluster.obb.bb_dims.x * cluster.obb.bb_dims.y
 		print 'Object size: ' + str(size)
 		if size > self.minSize:
-		    self.initX.append(c)
+		    self.initX.append(cluster)
 	    if len(self.initX) is 0:
 	        return
 	    print str(len(self.initX)) + ' objects detected'
@@ -56,13 +56,15 @@ class filter:
 	elif self.labeled is False:
 	    var = raw_input("Enter label for object " + str(self.labeledIdx) + ": ")
 	    print "You entered: ", var
-	    c = self.initX[self.labeledIdx]
+	    cluster = self.initX[self.labeledIdx]
+	    c = cluster.basicInfo
+	    bb = cluster.obb
 	    r = c.rgba_color.r
 	    g = c.rgba_color.g
 	    b = c.rgba_color.b
 	    hsv = cv2.cvtColor(np.array([[(r,g,b)]],dtype='float32'), cv2.COLOR_RGB2HSV)
 
-	    size = c.bb_dims.x * c.bb_dims.y
+	    size = bb.bb_dims.x * bb.bb_dims.y
 	    self.outf.write(var + "," + str(hsv[0][0][0]) + "," + str(hsv[0][0][1]) + "," + str(hsv[0][0][2]) + "," + str(size) + "\n")
 	    self.labeledIdx = self.labeledIdx + 1
             self.labeled = self.labeledIdx == len(self.initX)
@@ -90,9 +92,10 @@ class ui:
 	    return
 	self.canvas.delete("all")
 	for idx in range(0,len(clusters)):
-	    c = clusters[idx]
-	    if c is None:
+	    cluster = clusters[idx]
+	    if cluster is None:
 		continue
+	    c = cluster.basicInfo
 	    pts = [(c.points_min.x,c.points_min.y),(c.points_min.x,c.points_max.y),(c.points_max.x,c.points_max.y),(c.points_max.x,c.points_min.y)]
 	    offset = complex(c.points_centroid.x,c.points_centroid.y)
 	    cangle = 0 # cmath.exp(c.angle*1j)

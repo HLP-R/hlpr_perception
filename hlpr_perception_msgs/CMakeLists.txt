@@ -27,6 +27,10 @@ add_message_files(
   ObjectFeatures.msg
   PlaneFeatures.msg
   ExtractedFeaturesArray.msg
+  # Knowledge feature msgs
+  LabeledObjects.msg
+  ObjectKnowledge.msg
+  ObjectKnowledgeArray.msg
 )
 
 generate_messages(

@@ -17,7 +17,6 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <visualization_msgs/Marker.h>
-#include <hlpr_feature_extraction/PcFeatures.h>
 #include <hlpr_perception_msgs/OtherFeatures.h>
 #include <hlpr_perception_msgs/BasicFeatures.h>
 #include <hlpr_perception_msgs/OrientedBoundingBox.h>
@@ -73,7 +72,7 @@ void
 objectPoseTF(geometry_msgs::Transform geom_transform);
 
 void
-getObjectMarker(visualization_msgs::Marker &marker, hlpr_feature_extraction::PcFeatures &feats);
+getObjectMarker(visualization_msgs::Marker &marker, hlpr_perception_msgs::ObjectFeatures &feats);
 
 
 template<class pcType>
