@@ -7,8 +7,7 @@ import numpy as np
 import roslib
 import rospy
 
-from hlpr_object_labeling.msg import LabeledObjects
-from hlpr_knowledge_retrieval.msg import ObjectKnowledge, ObjectKnowledgeArray
+from hlpr_perception_msgs.msg import LabeledObjects, ObjectKnowledge, ObjectKnowledgeArray
 
 def get_param(name, value=None):
     private = "~%s" % name
@@ -24,17 +23,16 @@ class lookup:
         self.subscriber = rospy.Subscriber("/beliefs/labels", LabeledObjects, self.cbLabels, queue_size = 1)
 	self.knowPub = rospy.Publisher("/beliefs/knowledge", ObjectKnowledge)
 
-        fileref = get_param("data_file_location")
-        if fileref is not None:
-          self.filename = os.path.expanduser(fileref)
-	  self.readObjectKnowledge(self.filename)
-          print "Reading knowledge data from " + self.filename
-        else:
-          self.filename = None
         topicref = get_param("data_file_rostopic")
+        fileref = get_param("data_file_location")
+	self.filename = None
         if topicref is not None:
           self.rostopic = os.path.expanduser(topicref)
           self.fileSub = rospy.Subscriber(self.rostopic, String, self.cbFile, queue_size = 1)
+	elif fileref is not None:
+          self.filename = os.path.expanduser(fileref)
+  	  self.readObjectKnowledge(self.filename)
+          print "Reading knowledge data from " + self.filename
 
     def cbFile(self, ros_data):
         if self.filename is not ros_data.data:
