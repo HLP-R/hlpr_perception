@@ -33,6 +33,7 @@ class filter:
 	self.labeledIdx = 0
 	self.initX = []
 	self.finished = False
+	self.exit = False
 	self.filename = os.path.expanduser(get_param("feature_file_location", "tracked_object_data.txt"))
 	self.minSize = get_param("min_object_size", 0.001)
 	self.outf = open(self.filename, "w")
@@ -71,8 +72,9 @@ class filter:
 	elif self.finished is False:
 	    self.outf.close()
 	    self.finished = True
-	elif self.finished is True:
+	elif self.finished is True and self.exit is False:
 	    print "Objects written to " + str(self.filename)
+	    self.exit = True
 	    sys.exit()
 
 class ui:
