@@ -1,8 +1,8 @@
 <!-- Starts up everything needed to run the example listener/talker nodes. -->
 <launch>
-  <arg name="hlpr_nonplanar_segmentation/viz" default="true" />
+  <arg name="nonplanar_segmentation/viz" default="true" />
 
   <node pkg="hlpr_nonplanar_segmentation" type="nonplanar_seg" name="nonplanar_seg" output="screen" launch-prefix="gdb -ex run --args">
-    <param name="hlpr_nonplanar_segmentation/viz" value="$(arg hlpr_nonplanar_segmentation/viz)" />
+    <param name="nonplanar_segmentation/viz" value="$(arg nonplanar_segmentation/viz)" />
   </node>
 </launch>
