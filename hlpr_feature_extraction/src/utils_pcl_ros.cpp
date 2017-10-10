@@ -117,6 +117,10 @@ fillObjectFeaturesMsg (hlpr_perception_msgs::ObjectFeatures &objRosMsg,
 
     objRosMsg.setOtherFeatures = inObjFeatures.setOtherFeatures;
     objRosMsg.other = other;
+
+    objRosMsg.other.other_features_size = 308;
+    for(int i = 0;i<objRosMsg.other.other_features_size;i++)
+      objRosMsg.other.data.push_back(inObjFeatures.vfhs.points[0].histogram[i]);
 }
 
 void
