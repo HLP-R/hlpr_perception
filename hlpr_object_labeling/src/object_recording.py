@@ -33,6 +33,7 @@ class filter:
 	self.labeledIdx = 0
 	self.initX = []
 	self.finished = False
+	self.exit = False
 	self.filename = os.path.expanduser(get_param("feature_file_location", "tracked_object_data.txt"))
 	self.minSize = get_param("min_object_size", 0.001)
 	self.outf = open(self.filename, "w")
@@ -71,8 +72,9 @@ class filter:
 	elif self.finished is False:
 	    self.outf.close()
 	    self.finished = True
-	elif self.finished is True:
+	elif self.finished is True and self.exit is False:
 	    print "Objects written to " + str(self.filename)
+	    self.exit = True
 	    sys.exit()
 
 class ui:
@@ -102,11 +104,11 @@ class ui:
 	    rot = []
 	    for x,y in pts:
 		r = cangle * (complex(x,y)-offset) + offset
-		rot.append((-r.real + 0.5) * 500)
-		rot.append((-r.imag + 0.5) * 500)
+		rot.append((r.real + 0.5) * 500)
+		rot.append((r.imag + 0.5) * 500)
  	    rgb = '#%02x%02x%02x' % (c.rgba_color.r,c.rgba_color.g,c.rgba_color.b)
 	    poly = self.canvas.create_polygon(rot,outline=rgb,fill='white',width=5)
-	    label = self.canvas.create_text((-c.points_centroid.x+0.5)*500, (-c.points_centroid.y + 0.5)*500,text=str(idx),font="Verdana 10 bold")
+	    label = self.canvas.create_text((c.points_centroid.x+0.5)*500, (c.points_centroid.y + 0.5)*500,text=str(idx),font="Verdana 10 bold")
 	    self.canvas.pack()
 
 def main(args):
