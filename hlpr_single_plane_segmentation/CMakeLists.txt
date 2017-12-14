@@ -14,8 +14,15 @@ set(ROS_LIBRARIES /opt/ros/${ROS_DISTRO}/lib/libroscpp.so
     /opt/ros/${ROS_DISTRO}/lib/librostime.so)
 
 #find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure message_generation roscpp std_msgs geometry_msgs)
-find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs geometry_msgs sensor_msgs hlpr_perception_msgs)
-find_package(PCL 1.8 REQUIRED COMPONENTS)
+find_package(catkin REQUIRED COMPONENTS
+  message_generation
+  roscpp
+  std_msgs
+  geometry_msgs
+  sensor_msgs
+  hlpr_perception_msgs
+  pcl_ros
+)
 find_package(freenect2 REQUIRED)
 find_package(OpenCV 2 REQUIRED)
 
@@ -50,10 +57,10 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 add_library(spseg SHARED src/pc_segmentation.cpp src/utils.cpp)
-target_link_libraries(spseg ${PCL_LIBRARIES} ${ROS_LIBRARIES})
+target_link_libraries(spseg ${PCL_LIBRARIES} ${catkin_LIBRARIES})
 
 add_executable(sp_seg src/segmentation.cpp)
-target_link_libraries(sp_seg ${PCL_LIBRARIES} spseg ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(sp_seg ${PCL_LIBRARIES} spseg ${freenect2_LIBRARY} ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 add_dependencies(sp_seg hlpr_perception_msgs_generate_messages_cpp)
 

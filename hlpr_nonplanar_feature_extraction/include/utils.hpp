@@ -349,7 +349,7 @@ array2file(const T *arr, int size, std::ofstream &myfile, char *delim = "\n");
 
 template <class T>
 void
-vector2file(const std::vector<T> &vec, char *fileName = "tmp.txt", char *delim = "\n")
+vector2file(const std::vector<T> &vec, char *fileName, char *delim)
 {
   std::ofstream myfile;
   myfile.open (fileName);
@@ -361,7 +361,7 @@ vector2file(const std::vector<T> &vec, char *fileName = "tmp.txt", char *delim =
 
 template <class T>
 void
-file2vector(std::vector<T> &vec, char *fileName = "tmp.txt", char delim = ',')
+file2vector(std::vector<T> &vec, char *fileName, char delim)
 {
   std::ifstream myfile;
   myfile.open (fileName);
@@ -385,7 +385,7 @@ file2vector(std::vector<T> &vec, char *fileName = "tmp.txt", char delim = ',')
 
 template <class T>
 void
-doubleVector2file(const std::vector<std::vector<T> > &vec, char *fileName = "tmp.txt", char *delimiter = ",", char *delimiter2 = "\n")
+doubleVector2file(const std::vector<std::vector<T> > &vec, char *fileName, char *delimiter, char *delimiter2)
 {
   std::ofstream myfile;
   myfile.open (fileName);
@@ -402,7 +402,7 @@ doubleVector2file(const std::vector<std::vector<T> > &vec, char *fileName = "tmp
 
 template <class T>
 void
-file2doubleVector(std::vector<std::vector<T> > &vec, char *fileName = "tmp.txt", char delimiter = ',', char delimiter2 = '\n')
+file2doubleVector(std::vector<std::vector<T> > &vec, char *fileName, char delimiter, char delimiter2)
 {
   std::ifstream myfile;
   myfile.open (fileName);
@@ -446,7 +446,7 @@ file2doubleVector(std::vector<std::vector<T> > &vec, char *fileName = "tmp.txt",
 
 template <class T>
 void
-array2file(const T *arr, int size, char *fileName = "tmp.txt", char *delim = "\n")
+array2file(const T *arr, int size, char *fileName, char *delim)
 {
   std::ofstream myfile;
   myfile.open (fileName);
@@ -457,7 +457,7 @@ array2file(const T *arr, int size, char *fileName = "tmp.txt", char *delim = "\n
 
 template <class T>
 void
-array2file(const T *arr, int size, std::ofstream &myfile, char *delim = "\n")
+array2file(const T *arr, int size, std::ofstream &myfile, char *delim)
 {
   for(int i = 0; i < size; i++)
     myfile << arr[i] << delim;
