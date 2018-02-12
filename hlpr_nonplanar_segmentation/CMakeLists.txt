@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
 )
 find_package(freenect2 REQUIRED)
-find_package(OpenCV 2 REQUIRED)
+find_package(OpenCV 3 REQUIRED)
 
 #generate_dynamic_reconfigure_options(
 #  cfg/segmentation.cfg

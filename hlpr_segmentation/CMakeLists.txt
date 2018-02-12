@@ -25,9 +25,10 @@ IF(OpenCL_FOUND)
         )
 ENDIF(OpenCL_FOUND)
 
-find_package(PCL 1.7 REQUIRED COMPONENTS)
+#find_package(PCL 1.8 REQUIRED COMPONENTS)
+find_package(PCL REQUIRED)
 find_package(freenect2 REQUIRED)
-find_package(OpenCV 2 REQUIRED)
+find_package(OpenCV 3 REQUIRED)
 
 add_message_files(
   FILES
