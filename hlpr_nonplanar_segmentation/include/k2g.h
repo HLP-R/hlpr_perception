@@ -248,8 +248,8 @@ private:
 	libfreenect2::SyncMultiFrameListener listener_;
 	libfreenect2::FrameMap frames_;
 	libfreenect2::Frame undistorted_, registered_, big_mat_;
-	Eigen::Matrix<float,512,1> colmap;
-	Eigen::Matrix<float,424,1> rowmap;
+	Eigen::Matrix<float,512,1,Eigen::DontAlign> colmap;
+	Eigen::Matrix<float,424,1,Eigen::DontAlign> rowmap;
 	std::string serial_;
 	int map_[512 * 424]; 
 	float qnan_; 
