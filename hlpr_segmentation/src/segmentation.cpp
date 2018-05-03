@@ -29,6 +29,7 @@
 
 pcl::PointCloud<PointT>::ConstPtr prev_cloud;
 pcl::PointCloud<PointT> cloud_store;
+ros::Time stamp;
 boost::mutex cloud_mutex;
 boost::mutex imageName_mutex;
 bool writePCD2File = false;
@@ -69,6 +70,7 @@ cloud_cb_ros_ (const sensor_msgs::PointCloud2ConstPtr& msg)
 
   cloud_mutex.lock ();
   prev_cloud = cloud.makeShared();
+  stamp = msg->header.stamp;
   if(writePCD2File)
   {
     pcl::PointCloud<PointT>::Ptr saved_cloud(new pcl::PointCloud<PointT>(*prev_cloud));
@@ -171,7 +173,9 @@ main (int argc, char **argv)
   }
 
  // float workSpace[] = {-0.3,0.4,-0.25,0.35,0.3,2.0};
-  float workSpace[] = {-0.55,0.5,-0.2,0.45,0.3,2.0};
+  //////float workSpace[] = {-0.5,0.7,-0.4,0.45,0.6,1.5};
+  float workSpace[] = {-0.8,0.8,-0.4,0.45,0.6,1.5};
+  //float workSpace[] = {-1.5,1.5,-0.2,0.45,0.3,1.36};
   multi_plane_app.setWorkingVolumeThresholds(workSpace);
 
   //if(pA.output_type == comType::cROS)
@@ -260,7 +264,8 @@ main (int argc, char **argv)
 			pA.pre_proc,
   		 	pA.merge_clusters, viz_, pA.filterNoise); //true is for the viewer
 		hlpr_perception_msgs::SegClusters msg;
-		msg.header.stamp = ros::Time::now();
+		//msg.header.stamp = ros::Time::now();
+		msg.header.stamp = stamp;
 
 		// Pull out the cluster indices and put in msg
 		for (int ti = 0; ti < clusterIndicesStore.size(); ti++){
