@@ -16,6 +16,7 @@
 #include <pcl/common/io.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/pcl_visualizer.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <visualization_msgs/Marker.h>
 #include <hlpr_perception_msgs/OtherFeatures.h>
 #include <hlpr_perception_msgs/BasicFeatures.h>

@@ -14,6 +14,7 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <std_msgs/Header.h>
 #include <std_msgs/Float32MultiArray.h>
 #include <std_msgs/MultiArrayLayout.h>
 #include <std_msgs/MultiArrayDimension.h>
@@ -21,6 +22,7 @@
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
 #include <hlpr_perception_msgs/ObjectFeatures.h>
+#include <hlpr_perception_msgs/PlaneFeatures.h>
 #include <hlpr_perception_msgs/ExtractedFeaturesArray.h>
 #include <hlpr_perception_msgs/SegClusters.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -33,6 +35,8 @@
 
 pcl::PointCloud<PointT>::ConstPtr prev_cloud;
 pcl::PointCloud<PointT> object_filtered_cloud;
+//ros::Time stamp;
+std_msgs::Header header;
 boost::mutex cloud_mutex;
 boost::mutex imageName_mutex;
 bool writePCD2File = false;
@@ -98,6 +102,7 @@ cloud_cb_ros_ (const sensor_msgs::PointCloud2ConstPtr& msg)
   cloud_mutex.lock();
   // Store globally with constant pointer
   prev_cloud = cloud.makeShared();
+  //stamp = msg->header.stamp;
   cloud_mutex.unlock();
 
   gotCloud = true;
@@ -115,6 +120,8 @@ cluster_cb (const hlpr_perception_msgs::SegClusters& msg)
         pcl::PointCloud<PointT>::Ptr pclCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
         pcl::fromROSMsg(msg.clusters[i], *pclCloud);
         clusters.push_back(*pclCloud);
+
+        header = msg.clusters[i].header;
     }
 
     normals.clear();
@@ -138,7 +145,7 @@ cluster_cb (const hlpr_perception_msgs::SegClusters& msg)
 	}
 	cluster_idx.push_back(idx);
     }
-
+ 
     gotCluster = true;
 }
 
@@ -188,7 +195,7 @@ main (int argc, char **argv)
 
   OpenNIOrganizedMultiPlaneSegmentation multi_plane_app;
 
-  float workSpace[] = {-0.3,0.4,-0.25,0.35,0.3,2.0};//Simon on the other side:{-0.1,0.6,-0.4,0.15,0.7,1.1};//{-0.5,0.6,-0.4,0.4,0.4,1.1};
+  float workSpace[] = {-0.8,0.8,-0.4,0.45,0.6,1.5};//{-0.3,0.4,-0.25,0.35,0.3,2.0};//Simon on the other side:{-0.1,0.6,-0.4,0.15,0.7,1.1};//{-0.5,0.6,-0.4,0.4,0.4,1.1};
   multi_plane_app.setWorkingVolumeThresholds(workSpace);
   pcl::PointCloud<PointT>::Ptr cloud_ptr (new pcl::PointCloud<PointT>);
   pcl::PointCloud<pcl::Normal>::Ptr ncloud_ptr (new pcl::PointCloud<pcl::Normal>);
@@ -243,14 +250,28 @@ main (int argc, char **argv)
     //std::cout << "Selected cluster hue: " << feats[selected_cluster_index].hue << std::endl;
 
     hlpr_perception_msgs::ExtractedFeaturesArray rosMsg;
-    rosMsg.header.stamp = ros::Time::now();
+    rosMsg.header.stamp = header.stamp;//ros::Time::now();
+    rosMsg.header.frame_id = header.frame_id;
 
     for(int i = 0; i < feats.size(); i++) {
       hlpr_perception_msgs::ObjectFeatures ft;
       fillRosMessageForObjects(ft, feats[i]);
+      ft.header.stamp = header.stamp;
+      ft.header.frame_id = header.frame_id;
       rosMsg.objects.push_back(ft);
       rosMsg.transforms.push_back(ft.transform);
     }
+   
+    // add plane coeffs to message 
+    hlpr_perception_msgs::PlaneFeatures plane_ft;
+    std_msgs::Float32MultiArray plane_coeffs;
+    plane_coeffs.data.clear();
+    for(int i = 0; i < plane.size(); i++)
+      plane_coeffs.data.push_back(plane[i]);
+    plane_ft.header = rosMsg.header;
+    plane_ft.coeffs = plane_coeffs;
+    rosMsg.planes.push_back(plane_ft);
+
     pub.publish(rosMsg);
     objectPoseTF(rosMsg.transforms[0]);
 

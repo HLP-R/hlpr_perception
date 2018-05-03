@@ -310,7 +310,7 @@ void OpenNIOrganizedMultiPlaneSegmentation::featureExtraction(
     indices.push_back(i);
 
   //Feature Extraction
-    pc_cluster_features feat(cluster, used_plane_model);
+    pc_cluster_features feat(cluster, normals[i], used_plane_model);
 
     fittedBoxes.push_back(feat.oriented_bounding_box);
     cluster_colors.push_back(feat.color);

@@ -1,9 +1,8 @@
 <launch>
-  <arg name="segmentation/nv" default="false" />
+  <arg name="segmentation/nv" default="true" />
   <arg name="segmentation/rt" default="/kinect/qhd/points" />
   <arg name="segmentation/src" default="0" />
   <arg name="segmentation/c" default="0" />
-  <arg name="segmentation/ct" default="25" />
   <arg name="segmentation/dt" default="0.05" />
 
   <node pkg="hlpr_segmentation" type="pc_seg" name="pc_seg" >
@@ -11,11 +10,10 @@
     <param name="segmentation/rt" value="$(arg segmentation/rt)" />
     <param name="segmentation/src" value="$(arg segmentation/src)" />
     <param name="segmentation/c" value="$(arg segmentation/c)" />
-    <param name="segmentation/ct" value="$(arg segmentation/ct)" />
     <param name="segmentation/dt" value="$(arg segmentation/dt)" />
   </node>
 
-  <arg name="feature_extraction/nv" default="false" />
+  <arg name="feature_extraction/nv" default="true" />
   <node pkg="hlpr_feature_extraction" type="ft_ex" name="ft_ex" output="screen">
     <param name="feature_extraction/nv" value="$(arg feature_extraction/nv)" />
   </node>

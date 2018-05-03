@@ -7,7 +7,6 @@
 
 #include<utils_pcl_ros.hpp>
 
-
 void
 Cube_2_Arrows(pcl::ModelCoefficients &cube, boost::shared_ptr<pcl::visualization::PCLVisualizer> &viewer, int index)
 {
@@ -118,9 +117,23 @@ fillObjectFeaturesMsg (hlpr_perception_msgs::ObjectFeatures &objRosMsg,
     objRosMsg.setOtherFeatures = inObjFeatures.setOtherFeatures;
     objRosMsg.other = other;
 
+    /*
     objRosMsg.other.other_features_size = 308;
     for(int i = 0;i<objRosMsg.other.other_features_size;i++)
       objRosMsg.other.data.push_back(inObjFeatures.vfhs.points[0].histogram[i]);
+    */
+
+    objRosMsg.setViewpointHist = true;
+    objRosMsg.view_hist.vfh_features_size = 308;
+    for (int i=0; i<objRosMsg.view_hist.vfh_features_size; i++)
+      objRosMsg.view_hist.vfh_feature_vector.push_back(inObjFeatures.vfhs.points[0].histogram[i]);
+
+    sensor_msgs::PointCloud2 normals;
+    pcl::PCLPointCloud2 tmp;
+    pcl::toPCLPointCloud2(*inObjFeatures.normals, tmp);
+    pcl_conversions::fromPCL(tmp, normals);
+    objRosMsg.setNormals = true;
+    objRosMsg.normals = normals;
 }
 
 void

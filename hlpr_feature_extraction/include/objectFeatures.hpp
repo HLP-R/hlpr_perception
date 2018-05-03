@@ -208,6 +208,11 @@ private:
      fill();
   }
 
+  void normalsConst(pcl::PointCloud<pcl::Normal> &cluster_normals)
+  {
+    normals = cluster_normals.makeShared();
+  }
+
 public:
   int numFeatures;
 
@@ -268,6 +273,36 @@ public:
 
    }
 
+  pc_cluster_features(pcl::PointCloud<PointT> &cluster, pcl::PointCloud<pcl::Normal> &cluster_normals, Eigen::Vector4f &used_plane_model)
+   {
+     defaultConst();
+
+     pcl::compute3DCentroid(cluster, centroid);
+
+     pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients ());;
+     coefficients->values.resize (4);
+     //std::cout << "here" << std::endl;
+     int zero_count = 0;
+     for(int i = 0; i < 4; i++)
+     {
+       if(used_plane_model[i] == 0)
+         zero_count++;
+       coefficients->values[i] = used_plane_model[i];
+     }
+
+     bool use_projection = true;
+     if(zero_count > 3)
+       use_projection = false;
+
+     //if(use_projection)
+       boundingBoxWithCoeff(cluster, coefficients);
+     //else
+     //  boundingBoxWithZ(cluster);
+
+     clusterConst(cluster);
+     normalsConst(cluster_normals);
+   }
+
   pc_cluster_features(pcl::PointCloud<PointT>::Ptr &contour){
     defaultConst();
 
@@ -318,7 +353,7 @@ public:
   pcl::PointCloud<PointT>::Ptr plane_cloud;
   pcl::PointCloud<PointT>::Ptr parent_cloud;
   pcl::PointIndices indices; //indices in the parent point cloud
-  pcl::PointCloud<pcl::Normal> normals;
+  pcl::PointCloud<pcl::Normal>::Ptr normals;
   
   bool setViewpointHist = true;                // boolean to check if viewpoint Histogram is being computed and set (Default - true)
   pcl::PointCloud<pcl::VFHSignature308> vfhs;// (new pcl::PointCloud<pcl::VFHSignature308> ());

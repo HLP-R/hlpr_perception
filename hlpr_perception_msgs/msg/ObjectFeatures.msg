@@ -18,3 +18,6 @@ ViewpointHist view_hist
 
 bool setOtherFeatures        # Flag to state if other features were computed and set (default=false)
 OtherFeatures other
+
+bool setNormals              # Flag to state if normals were added as features (default=false)
+sensor_msgs/PointCloud2 normals
