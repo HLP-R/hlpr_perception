@@ -25,4 +25,4 @@ sudo pip install face_recognition
 sudo pip install git+https://github.com/ageitgey/face_recognition_models
 ````
 
-Check `https://github.com/ageitgey/face_recognition#face-recognition` for more details.
+Check <https://github.com/ageitgey/face_recognition#face-recognition> for more details.
