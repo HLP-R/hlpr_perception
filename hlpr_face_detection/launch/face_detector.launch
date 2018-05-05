@@ -5,6 +5,6 @@
 
 	<param name="image_topic_name" value="$(arg image_topic_name)"/>
 
-	<node name="face_detector" pkg="face_detection" type="face_detector.py" output="screen" cwd="node"></node>
+	<node name="face_detector" pkg="hlpr_face_detection" type="face_detector.py" output="screen" cwd="node"></node>
 
 </launch>

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>face_detection</name>
+  <name>hlpr_face_detection</name>
   <version>1.0.0</version>
   <description>The face_detection package</description>
 

@@ -5,7 +5,7 @@ import cv2
 from std_msgs.msg import String, Float32MultiArray, Bool
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image, PointCloud2, CompressedImage
-from face_detection.msg import FaceDetectionTopic
+from hlpr_face_detection.msg import FaceDetectionTopic
 import face_recognition
 
 class FaceDetector:
