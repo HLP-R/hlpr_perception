@@ -17,7 +17,7 @@ class FaceDetector:
     self.rgb_image = None
     self.tgtdir = tgtdir
     image_topic = rospy.get_param("/image_topic_name")
-    detection_sub = rospy.Subscriber(image_topic,Image, self.callback, queue_size=1, buff_size=52428800)
+    detection_sub = rospy.Subscriber(image_topic, Image, self.callback, queue_size=1, buff_size=52428800)
 
     rospy.sleep(5)
     print "Finished Init for Face Detector"
@@ -36,7 +36,11 @@ class FaceDetector:
 
 
   def detect_faces(self, img):
-    faces = face_recognition.face_locations(img, number_of_times_to_upsample=1)
+    use_gpu = rospy.get_param("/use_gpu")
+    if(use_gpu):
+      faces = face_recognition.face_locations(img, number_of_times_to_upsample=1, model="cnn")
+    else:
+      faces = face_recognition.face_locations(img, number_of_times_to_upsample=1)
     multi_array = []
     for face in faces:
       face_array = Float32MultiArray()
