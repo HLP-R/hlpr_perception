@@ -8,7 +8,7 @@ $ cd ..
 $ sudo python setup.py install --no USE_AVX_INSTRUCTIONS --no DLIB_USE_CUDA
 ````
 
-#Install dlib from source (with GPU support/CUDA)
+# Install dlib from source (with GPU support/CUDA)
 ````
 $ cd ~/
 $ git clone https://github.com/davisking/dlib.git
