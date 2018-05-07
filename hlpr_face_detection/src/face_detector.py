@@ -16,8 +16,7 @@ class FaceDetector:
     self.bridge = CvBridge()
     self.rgb_image = None
     self.tgtdir = tgtdir
-    image_topic = rospy.get_param("/image_topic_name")
-    detection_sub = rospy.Subscriber(image_topic, Image, self.callback, queue_size=1, buff_size=52428800)
+    detection_sub = rospy.Subscriber("image_topic", Image, self.callback, queue_size=1, buff_size=52428800)
 
     rospy.sleep(5)
     print "Finished Init for Face Detector"
