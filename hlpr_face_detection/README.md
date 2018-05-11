@@ -25,4 +25,12 @@ sudo pip install face_recognition
 sudo pip install git+https://github.com/ageitgey/face_recognition_models
 ````
 
-Check <https://github.com/ageitgey/face_recognition#face-recognition> for more details.
+Check <https://github.com/ageitgey/face_recognition#face-recognition> for more details on the algorithm.
+
+# Test the face recognition package
+````
+Without GPU: roslaunch hlpr_face_detection face_detector.launch 
+With GPU (more accurate version): roslaunch hlpr_face_detection face_detector_gpu.launch
+````
+
+
