@@ -6,7 +6,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--as-needed -pthread")
 
 set(OPENNI_INCLUDE_DIRS /usr/include/ni)
-set(ROS_DISTRO indigo)
+set(ROS_DISTRO kinetic)
 set(ROS_LIBRARIES /opt/ros/${ROS_DISTRO}/lib/libroscpp.so 
         /opt/ros/${ROS_DISTRO}/lib/libroscpp_serialization.so 
         /opt/ros/${ROS_DISTRO}/lib/librosconsole.so     
