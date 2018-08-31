@@ -6,15 +6,17 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--as-needed -pthread")
 
 set(OPENNI_INCLUDE_DIRS /usr/include/ni)
-set(ROS_DISTRO indigo)
-set(ROS_LIBRARIES /opt/ros/${ROS_DISTRO}/lib/libroscpp.so 
-        /opt/ros/${ROS_DISTRO}/lib/libroscpp_serialization.so 
-        /opt/ros/${ROS_DISTRO}/lib/librosconsole.so     
-        /opt/ros/${ROS_DISTRO}/lib/libroslib.so
-    /opt/ros/${ROS_DISTRO}/lib/librostime.so)
 
 #find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure message_generation roscpp std_msgs geometry_msgs)
-find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs geometry_msgs sensor_msgs)
+find_package(catkin REQUIRED COMPONENTS
+  message_generation
+  roscpp
+  std_msgs
+  geometry_msgs
+  sensor_msgs
+  roscpp
+  hlpr_perception_msgs
+)
 find_package(OpenCL QUIET)
 IF(OpenCL_FOUND)
         SET(LIBRARIES
@@ -23,9 +25,10 @@ IF(OpenCL_FOUND)
         )
 ENDIF(OpenCL_FOUND)
 
-find_package(PCL 1.7 REQUIRED COMPONENTS)
+#find_package(PCL 1.8 REQUIRED COMPONENTS)
+find_package(PCL REQUIRED)
 find_package(freenect2 REQUIRED)
-find_package(OpenCV 2 REQUIRED)
+find_package(OpenCV 3 REQUIRED)
 
 add_message_files(
   FILES
@@ -63,8 +66,8 @@ target_link_libraries(pcseg ${PCL_LIBRARIES} ${ROS_LIBRARIES})
 
 add_executable(pc_seg src/segmentation.cpp)
 #add_executable(listener src/listener.cpp src/nodes/listener_node.cpp)
-#target_link_libraries(pc_seg ${catkin_LIBRARIES} ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
-target_link_libraries(pc_seg ${PCL_LIBRARIES} pcseg ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
+#target_link_libraries(pc_seg ${catkin_LIBRARIES} ${freenect2_LIBRARY} ${catkin_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(pc_seg ${PCL_LIBRARIES} pcseg ${freenect2_LIBRARY} ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 #add_dependencies(pc_seg segmentation_gencfg segmentation_generate_messages_cpp)
 add_dependencies(pc_seg segmentation_generate_messages_cpp hlpr_perception_msgs_generate_messages_cpp)

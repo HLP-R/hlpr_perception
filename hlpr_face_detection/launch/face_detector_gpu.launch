@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+<launch>
+	<arg name="image_topic_name" default="/kinect/qhd/image_color_rect"/>
+	<arg name="use_gpu" default="True"/>
+
+	<param name="image_topic_name" value="$(arg image_topic_name)"/>
+	<param name="use_gpu" value="$(arg use_gpu)" type="bool"/>
+
+	<node name="face_detector" pkg="hlpr_face_detection" type="face_detector.py" output="screen" cwd="node"></node>
+
+</launch>

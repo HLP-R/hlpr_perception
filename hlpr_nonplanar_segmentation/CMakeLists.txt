@@ -6,18 +6,17 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--as-needed -pthread")
 
 set(OPENNI_INCLUDE_DIRS /usr/include/ni)
-set(ROS_DISTRO indigo)
-set(ROS_LIBRARIES /opt/ros/${ROS_DISTRO}/lib/libroscpp.so 
-        /opt/ros/${ROS_DISTRO}/lib/libroscpp_serialization.so 
-        /opt/ros/${ROS_DISTRO}/lib/librosconsole.so     
-        /opt/ros/${ROS_DISTRO}/lib/libroslib.so
-    /opt/ros/${ROS_DISTRO}/lib/librostime.so)
-
 #find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure message_generation roscpp std_msgs geometry_msgs)
-find_package(catkin REQUIRED COMPONENTS roscpp std_msgs geometry_msgs sensor_msgs hlpr_perception_msgs)
-find_package(PCL 1.8 REQUIRED COMPONENTS)
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  std_msgs
+  geometry_msgs
+  sensor_msgs
+  hlpr_perception_msgs
+  pcl_ros
+)
 find_package(freenect2 REQUIRED)
-find_package(OpenCV 2 REQUIRED)
+find_package(OpenCV 3 REQUIRED)
 
 #generate_dynamic_reconfigure_options(
 #  cfg/segmentation.cfg
@@ -36,12 +35,12 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 add_library(nonplanarseg SHARED src/pc_segmentation.cpp src/utils.cpp)
-target_link_libraries(nonplanarseg ${PCL_LIBRARIES} ${ROS_LIBRARIES})
+target_link_libraries(nonplanarseg ${PCL_LIBRARIES} ${catkin_LIBRARIES})
 
 add_executable(nonplanar_seg src/segmentation.cpp)
 #add_executable(listener src/listener.cpp src/nodes/listener_node.cpp)
-#target_link_libraries(pc_seg ${catkin_LIBRARIES} ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBS})
-target_link_libraries(nonplanar_seg ${PCL_LIBRARIES} nonplanarseg ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${OpenCV_LIBRARIES})
+#target_link_libraries(pc_seg ${catkin_LIBRARIES} ${freenect2_LIBRARY} ${ROS_LIBRARIES} ${catkin_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(nonplanar_seg ${PCL_LIBRARIES} nonplanarseg ${freenect2_LIBRARY} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 #add_dependencies(pc_seg segmentation_gencfg segmentation_generate_messages_cpp)
 add_dependencies(nonplanar_seg hlpr_perception_msgs_generate_messages_cpp)

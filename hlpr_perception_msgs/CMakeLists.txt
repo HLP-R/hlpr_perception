@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(hlpr_perception_msgs)
 find_package(catkin REQUIRED COMPONENTS
+  roscpp
   geometry_msgs
   sensor_msgs
   std_msgs
   tf2_ros
   message_generation
+  pcl_ros
 )
-
-find_package(PCL 1.8 REQUIRED COMPONENTS)
 
 add_message_files(
   FILES
@@ -17,7 +17,7 @@ add_message_files(
   SegClusters.msg
   SegPlanes.msg
   ClusterIndex.msg
-  # Feature extraction msgs
+  # Feature extraction msgsnrg
   BasicFeatures.msg
   ShapeHist.msg
   ColorHist.msg

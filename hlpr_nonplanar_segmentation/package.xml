@@ -15,4 +15,5 @@
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>sensor_msgs</depend>
+  <depend>hlpr_perception_msgs</depend>
 </package>
