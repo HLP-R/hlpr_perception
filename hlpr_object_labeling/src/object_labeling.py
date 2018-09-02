@@ -11,8 +11,7 @@ import pdb
 import tf
 import itertools
 from Tkinter import *
-from hlpr_feature_extraction.msg import PcFeatureArray
-from hlpr_object_labeling.msg import LabeledObjects
+from hlpr_perception_msgs.msg import ObjectFeatures, ExtractedFeaturesArray, LabeledObjects
 from std_msgs.msg import String
 
 pf = None
@@ -44,15 +43,14 @@ class filter:
 	self.valW = get_param("hsv_val_weight",1)
 	self.sizeW = get_param("size_weight",50000)
         fileref = get_param("feature_file_location")
-	if fileref is not None:
-    	  self.filename = os.path.expanduser(fileref)
-	else:
-	  self.filename = None
 	topicref = get_param("feature_file_rostopic")
+	self.filename = None
 	if topicref is not None:
     	  self.rostopic = os.path.expanduser(topicref)
           self.fileSub = rospy.Subscriber(self.rostopic, String, self.cbFile, queue_size = 1)
-        self.subscriber = rospy.Subscriber("/beliefs/features", PcFeatureArray, self.cbClusters, queue_size = 1)
+	elif fileref is not None:
+    	  self.filename = os.path.expanduser(fileref)
+        self.subscriber = rospy.Subscriber("/beliefs/features", ExtractedFeaturesArray, self.cbClusters, queue_size = 1)
 	self.pauseSub = rospy.Subscriber("/pause_labeling", String, self.cbPause, queue_size = 1)
 	self.orderPub = rospy.Publisher("/beliefs/labels", LabeledObjects, queue_size = 1)
 
@@ -136,9 +134,9 @@ class filter:
 	  
     def hsvDiff(self, c1,c2):
       	hsv1 = c1[1:4]
-      	r2 = c2.rgba_color.r
-      	g2 = c2.rgba_color.g
-      	b2 = c2.rgba_color.b
+      	r2 = c2.basicInfo.rgba_color.r
+      	g2 = c2.basicInfo.rgba_color.g
+      	b2 = c2.basicInfo.rgba_color.b
    	hsv2 = cv2.cvtColor(np.array([[(r2,g2,b2)]],dtype='float32'), cv2.COLOR_RGB2HSV)
 	h1 = hsv2[0][0][0]
 	h2 = float(hsv1[0])
@@ -147,7 +145,7 @@ class filter:
     	return abs(huediff), abs(hsv2[0][0][1]-float(hsv1[1])), abs(hsv2[0][0][2]-float(hsv1[2]))
 
     def sizeDiff(self, c1,c2):
-    	size = c2.bb_dims.x * c2.bb_dims.y
+    	size = c2.obb.bb_dims.x * c2.obb.bb_dims.y
     	return abs(size - float(c1[4]))
 
     def calculateError(self, init, cluster):
@@ -223,20 +221,22 @@ class ui:
 	    return
 	self.canvas.delete("all")
 	for idx in range(0,len(clusters)):
-	    c = clusters[idx]
-	    if c is None:
+	    cluster = clusters[idx]
+	    if cluster is None:
 		continue
+	    c = cluster.basicInfo
 	    pts = [(c.points_min.x,c.points_min.y),(c.points_min.x,c.points_max.y),(c.points_max.x,c.points_max.y),(c.points_max.x,c.points_min.y)]
 	    offset = complex(c.points_centroid.x,c.points_centroid.y)
 	    cangle = 0 # cmath.exp(c.angle*1j)
 	    rot = []
 	    for x,y in pts:
 		r = cangle * (complex(x,y)-offset) + offset
-		rot.append((-r.real + 0.5) * 500)
-		rot.append((-r.imag + 0.5) * 500)
+		rot.append((r.real + 0.5) * 500)
+		rot.append((r.imag + 0.5) * 500)
  	    rgb = '#%02x%02x%02x' % (c.rgba_color.r,c.rgba_color.g,c.rgba_color.b)
 	    poly = self.canvas.create_polygon(rot,outline=rgb,fill='white',width=5)
-	    label = self.canvas.create_text((-c.points_centroid.x+0.5)*500, (-c.points_centroid.y + 0.5)*500,text=str(ids[idx].data),font="Verdana 10 bold")
+	    label = self.canvas.create_text((c.points_centroid.x+0.5)*500, (c.points_centroid.y + 0.5)*500,text=str(ids[idx].data),font="Verdana 10 bold")
+	    #label = self.canvas.create_text((-c.points_centroid.x+0.5)*500, (-c.points_centroid.y + 0.5)*500,text=str(ids[idx].data),font="Verdana 10 bold")
 	    self.canvas.pack()
 
 def main(args):

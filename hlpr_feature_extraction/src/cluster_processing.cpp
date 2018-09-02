@@ -312,7 +312,7 @@ void OpenNIOrganizedMultiPlaneSegmentation::featureExtraction(
   //Feature Extraction
     pc_cluster_features feat(cluster, used_plane_model);
 
-    fittedBoxes.push_back(feat.aligned_bounding_box);
+    fittedBoxes.push_back(feat.oriented_bounding_box);
     cluster_colors.push_back(feat.color);
 
     vfh.setInputCloud (cluster.makeShared());

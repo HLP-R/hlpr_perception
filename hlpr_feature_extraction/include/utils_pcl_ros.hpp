@@ -17,7 +17,11 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <visualization_msgs/Marker.h>
-#include <hlpr_feature_extraction/PcFeatures.h>
+#include <hlpr_perception_msgs/OtherFeatures.h>
+#include <hlpr_perception_msgs/BasicFeatures.h>
+#include <hlpr_perception_msgs/OrientedBoundingBox.h>
+#include <hlpr_perception_msgs/ObjectFeatures.h>
+#include <hlpr_perception_msgs/PlaneFeatures.h>
 #include <tf2_ros/transform_broadcaster.h>
 
 /*
@@ -40,17 +44,31 @@ void
 Cube_2_Arrows(pcl::ModelCoefficients &cube, boost::shared_ptr<pcl::visualization::PCLVisualizer> &viewer, int index);
 
 Box3D
-//boundingBoxWithCoeff(pcl::PointCloud<PointT> &cluster, pcl::ModelCoefficients::Ptr coefficients);
 boundingBoxWithCoeff(pcl::PointCloud<PointT> &cluster, pcl::ModelCoefficients::Ptr coefficients, pcl::PointCloud<PointT>::Ptr &cloud_transformed);
 
 void
-fillRosMessage (hlpr_feature_extraction::PcFeatures &outRosMsg, const pc_cluster_features &inObjFeatures);
+fillBasicFeaturesMsg (hlpr_perception_msgs::BasicFeatures &basicInfo, const pc_cluster_features &inObjFeatures);
+
+void
+fillOrientedBoundingBoxMsg (hlpr_perception_msgs::OrientedBoundingBox &obb, const pc_cluster_features &inObjFeatures);
+
+void
+fillRosMessageForObjects (hlpr_perception_msgs::ObjectFeatures &objRosMsg,
+                            const pc_cluster_features &inObjFeatures);
+
+// Top-level message for Objects
+void
+fillObjectFeaturesMsg (hlpr_perception_msgs::ObjectFeatures &objRosMsg,
+                       hlpr_perception_msgs::BasicFeatures &basicInfo,
+                       hlpr_perception_msgs::OrientedBoundingBox &obb,
+                       hlpr_perception_msgs::OtherFeatures &other,
+                        const pc_cluster_features &inObjFeatures);
 
 void
 objectPoseTF(geometry_msgs::Transform geom_transform);
 
 void
-getObjectMarker(visualization_msgs::Marker &marker, hlpr_feature_extraction::PcFeatures &feats);
+getObjectMarker(visualization_msgs::Marker &marker, hlpr_perception_msgs::ObjectFeatures &feats);
 
 
 template<class pcType>

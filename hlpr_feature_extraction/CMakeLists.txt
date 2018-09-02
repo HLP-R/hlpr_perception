@@ -15,6 +15,7 @@ IF(OpenCL_FOUND)
 		${LIBRARIES}
 	)
 ENDIF(OpenCL_FOUND)
+
 find_package(catkin REQUIRED COMPONENTS
   message_generation
   roscpp
@@ -27,26 +28,13 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(freenect2 REQUIRED)
 find_package(OpenCV 3 REQUIRED)
 
-add_message_files(
-  FILES
-  PcFeatures.msg
-  PcFeatureArray.msg
-)
-
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  geometry_msgs
-  hlpr_segmentation
-)
-
 #generate_dynamic_reconfigure_options(
 #  cfg/segmentation.cfg
 #)
 
 catkin_package(
  # CATKIN_DEPENDS dynamic_reconfigure message_runtime roscpp std_msgs geometry_msgs
-  CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs hlpr_segmentation
+  CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs hlpr_perception_msgs
 )
 
 include_directories(${PCL_INCLUDE_DIRS})
