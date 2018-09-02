@@ -44,11 +44,7 @@ void
 Cube_2_Arrows(pcl::ModelCoefficients &cube, boost::shared_ptr<pcl::visualization::PCLVisualizer> &viewer, int index);
 
 Box3D
-//boundingBoxWithCoeff(pcl::PointCloud<PointT> &cluster, pcl::ModelCoefficients::Ptr coefficients);
 boundingBoxWithCoeff(pcl::PointCloud<PointT> &cluster, pcl::ModelCoefficients::Ptr coefficients, pcl::PointCloud<PointT>::Ptr &cloud_transformed);
-
-//void
-//fillRosMessage (hlpr_feature_extraction::PcFeatures &outRosMsg, const pc_cluster_features &inObjFeatures);
 
 void
 fillBasicFeaturesMsg (hlpr_perception_msgs::BasicFeatures &basicInfo, const pc_cluster_features &inObjFeatures);
