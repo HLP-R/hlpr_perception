@@ -1,0 +1,5 @@
+tasks:
+    - drawer: !include drawer_task.yaml
+    - lamp: !include lamp_task.yaml
+    - pitcher: !include pitcher_task.yaml
+    - bowl: !include bowl_task.yaml

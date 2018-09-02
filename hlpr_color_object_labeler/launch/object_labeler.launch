@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="features_topic" default="/beliefs/features"/>
+    <arg name="labels_topic" default="/beliefs/labels"/>
+    <arg name="task_yaml" default="test_task.yaml"/>
+
+    <node name="hlpr_color_object_labeler" pkg="hlpr_color_object_labeler" type="object_labeler.py" respawn="false" output="screen">
+        <param name="features_topic" value="$(arg features_topic)" type="string"/>
+        <param name="labels_topic" value="$(arg labels_topic)" type="string"/>
+        <param name="task_yaml" value="$(find hlpr_color_object_labeler)/config/tasks/$(arg task_yaml)" type="string"/>
+    </node>
+</launch>

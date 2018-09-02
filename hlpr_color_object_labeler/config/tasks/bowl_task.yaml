@@ -1,0 +1,4 @@
+objects:
+    - large_bowl: !include ../objects/large_bowl.yaml
+    - small_bowl: !include ../objects/small_bowl.yaml
+    - spoon: !include ../objects/spoon.yaml
