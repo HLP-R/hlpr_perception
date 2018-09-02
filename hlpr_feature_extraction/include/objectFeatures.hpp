@@ -73,8 +73,6 @@ private:
       oriented_bounding_box.center.y = position(1);
       oriented_bounding_box.center.z = position(2);
 
-      std::cout<<"Center of OBB: ("<< position(0) <<", "<<position(1)<<", "<<position(2)<<")"<<std::endl; 
-
       Eigen::Quaternion<float> quat (rotational_matrix_OBB);
       oriented_bounding_box.rot_quat[0] = quat.x();
 	    oriented_bounding_box.rot_quat[1] = quat.y();
