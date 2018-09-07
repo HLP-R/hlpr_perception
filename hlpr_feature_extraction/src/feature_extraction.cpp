@@ -14,6 +14,7 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <std_msgs/Header.h>
 #include <std_msgs/Float32MultiArray.h>
 #include <std_msgs/MultiArrayLayout.h>
 #include <std_msgs/MultiArrayDimension.h>
@@ -33,6 +34,7 @@
 
 pcl::PointCloud<PointT>::ConstPtr prev_cloud;
 pcl::PointCloud<PointT> object_filtered_cloud;
+std_msgs::Header header;
 boost::mutex cloud_mutex;
 boost::mutex imageName_mutex;
 bool writePCD2File = false;
@@ -115,6 +117,7 @@ cluster_cb (const hlpr_perception_msgs::SegClusters& msg)
         pcl::PointCloud<PointT>::Ptr pclCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
         pcl::fromROSMsg(msg.clusters[i], *pclCloud);
         clusters.push_back(*pclCloud);
+        header = msg.clusters[i].header;
     }
 
     normals.clear();
@@ -244,10 +247,12 @@ main (int argc, char **argv)
 
     hlpr_perception_msgs::ExtractedFeaturesArray rosMsg;
     rosMsg.header.stamp = ros::Time::now();
+    rosMsg.header.frame_id = header.frame_id;
 
     for(int i = 0; i < feats.size(); i++) {
       hlpr_perception_msgs::ObjectFeatures ft;
       fillRosMessageForObjects(ft, feats[i]);
+      ft.header.frame_id = header.frame_id;
       rosMsg.objects.push_back(ft);
       rosMsg.transforms.push_back(ft.transform);
     }
