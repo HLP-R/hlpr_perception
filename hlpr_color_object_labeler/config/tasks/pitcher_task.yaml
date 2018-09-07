@@ -1,0 +1,3 @@
+objects:
+    - pitcher: !include ../objects/pitcher.yaml
+    - bowl: !include ../objects/small_bowl.yaml

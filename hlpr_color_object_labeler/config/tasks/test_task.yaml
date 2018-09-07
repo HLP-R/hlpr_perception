@@ -1,0 +1,2 @@
+objects:
+    - test: !include ../objects/test.yaml

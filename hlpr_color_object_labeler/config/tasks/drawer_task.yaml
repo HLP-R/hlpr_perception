@@ -1,0 +1,2 @@
+objects:
+    - drawer: !include ../objects/drawer.yaml
