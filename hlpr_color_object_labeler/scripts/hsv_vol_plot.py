@@ -21,7 +21,7 @@ def get_files_recursive(path, type=None, full=True):
     if not type is None:
         files = filter(lambda f: f.endswith('.'+type), files)
 
-return files
+    return files
 
 def main():
     parser = argparse.ArgumentParser(description='Show hue/volume plot for task')
@@ -57,17 +57,20 @@ def main():
     ax[0,0].set_ylabel('Volume')
 
     ax[1,0].hist(hue, bins=25, color='r')
+    ax[1,0].set_xlim([0,1])
     ax[1,0].set_xlabel('Hue')
     ax[1,0].set_ylabel('Counts')
 
     ax[0,1].plot(sat, vol, 'g.')
 
     ax[1,1].hist(sat, bins=25, color='g')
+    ax[1,1].set_xlim([0,1])
     ax[1,1].set_xlabel('Saturation')
     
     ax[0,2].plot(val, vol, 'b.')
 
     ax[1,2].hist(hue, bins=25, color='b')
+    ax[1,2].set_xlim([0,1])
     ax[1,2].set_xlabel('Value')
 
     plt.show()    
