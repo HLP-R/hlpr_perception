@@ -16,11 +16,11 @@ class ObjectsTF:
 
     def publish_objects(self, msg):
         for obj, label in zip(msg.objects, msg.labels):
-            p, q = get_pose(obj)
+            p, q = self.get_pose(obj)
             self.tf.sendTransform((p.x, p.y, p.z),
-                                  (p.x, p.y, p.z, p.w),
+                                  (q.x, q.y, q.z, q.w),
                                   msg.header.stamp,
-                                  label,
+                                  label.data,
                                   msg.header.frame_id)
     def run(self):
         self.tf = tf.TransformBroadcaster()
