@@ -54,6 +54,7 @@ def main():
     fig, ax = plt.subplots(2, 3, sharex='col', sharey='row')
 
     ax[0,0].plot(hue, vol, 'r.')
+    ax[0,0].set_xlim([0,1])
     ax[0,0].set_ylabel('Volume')
 
     ax[1,0].hist(hue, bins=25, color='r')
@@ -62,14 +63,16 @@ def main():
     ax[1,0].set_ylabel('Counts')
 
     ax[0,1].plot(sat, vol, 'g.')
+    ax[0,1].set_xlim([0,1])
 
     ax[1,1].hist(sat, bins=25, color='g')
     ax[1,1].set_xlim([0,1])
     ax[1,1].set_xlabel('Saturation')
     
     ax[0,2].plot(val, vol, 'b.')
+    ax[0,2].set_xlim([0,1])
 
-    ax[1,2].hist(hue, bins=25, color='b')
+    ax[1,2].hist(val, bins=25, color='b')
     ax[1,2].set_xlim([0,1])
     ax[1,2].set_xlabel('Value')
 
