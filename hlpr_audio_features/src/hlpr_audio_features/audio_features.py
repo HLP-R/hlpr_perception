@@ -45,12 +45,11 @@ class AudioFeature():
         d_info=None
         d_index=None
 
-        self._channels = 4
+        self._channels = 2
         #self._rate = 48000
         self._rate = 16000
         fmt = pya.paInt16
         self._timestep = 0.01
-        self._frames_per_block = int(self._timestep*self._rate)
         self._data = {}
         self._data["data"]=[]
 
@@ -62,26 +61,35 @@ class AudioFeature():
             channels = d_info["maxInputChannels"]
             if channels >0:
                 print i, ":", d_info["name"], channels
-                
+            if "miniDSP" in name:
+                print d_info
+                self._rate = int(d_info["defaultSampleRate"])
+                found = True
+                d_index=i
+                break
+            
         if not found or print_only:
             exit(-1)
+
+        self._frames_per_block = int(self._timestep*self._rate)
+
         
         self._stream = self._pa.open(format=fmt, channels=self._channels, rate=self._rate, input=True, frames_per_buffer=self._frames_per_block, input_device_index=d_index)
-        self._intensity_pub = rospy.Publisher("/contingency/audio/intensity",ArrayFeature, queue_size=1)
-        self._flatness_pub = rospy.Publisher("/contingency/audio/flatness", ArrayFeature, queue_size=1)
-        self._band_pub = rospy.Publisher("/contingency/audio/bands", ArrayFeature, queue_size=1)
+        self._intensity_pub = rospy.Publisher("/features/audio/intensity",Float64MultiArray, queue_size=1)
+        self._flatness_pub = rospy.Publisher("/features/audio/flatness",Float64MultiArray, queue_size=1)
+        self._band_pub = rospy.Publisher("/features/audio/bands", Float64MultiArray, queue_size=1)
 
 
         self._listen_thread=threading.Thread(target=self.listen)
         self._listen_thread.start()
         
     def get_features(self,data):
-        data = np.reshape(data, [4,-1],"F")
+        data = np.reshape(data, [self._channels,-1],"F")
         #print data
         band_features = [[] for i in range(5)]
         flatness_features = []
         amp_features = []
-        for k in range(4):
+        for k in range(self._channels):
             fft = np.fft.fft(data[k])
             spectrum = abs(fft)**2
             freqs = abs(np.fft.fftfreq(len(data[k]),d=1.0/self._rate))
@@ -109,7 +117,7 @@ class AudioFeature():
         for b in band_features:
             bands_out+=b
 
-        return (ArrayFeature(amp_features),ArrayFeature(flatness_features),ArrayFeature(bands_out))
+        return (Float64MultiArray(data=amp_features),Float64MultiArray(data=flatness_features),Float64MultiArray(data=bands_out))
 
     def analyze(self):
         while not rospy.is_shutdown():
@@ -118,7 +126,7 @@ class AudioFeature():
                 rospy.sleep(0.2)
                 continue
 
-            read_fmt="{}h".format(self._frames_per_block)
+            read_fmt="{}h".format(self._frames_per_block*self._channels)
             data=struct.unpack(read_fmt,self._data["data"])
             intensity,flatness,bands = self.get_features(data)
             self._intensity_pub.publish(intensity)
