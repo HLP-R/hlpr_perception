@@ -48,6 +48,7 @@ void
 fillRosMessage (hlpr_feature_extraction::PcFeatures &outRosMsg, const pc_cluster_features &inObjFeatures)
 {
   outRosMsg.header.stamp = ros::Time::now();
+  outRosMsg.header.frame_id = "head_camera_rgb_optical_frame";
 
   outRosMsg.transform.translation.x = inObjFeatures.aligned_bounding_box.center.x;
   outRosMsg.transform.translation.y = inObjFeatures.aligned_bounding_box.center.y;
@@ -100,7 +101,7 @@ void objectPoseTF(geometry_msgs::Transform geom_transform)
   transformStamped.transform = geom_transform;
   transformStamped.header.stamp = ros::Time::now();
   //or is it kinect_ir_optical_frame
-  transformStamped.header.frame_id = "kinect_rgb_optical_frame";
+  transformStamped.header.frame_id = "head_camera_rgb_optical_frame";
   transformStamped.child_frame_id = "main_object";
   br.sendTransform(transformStamped);
 }
