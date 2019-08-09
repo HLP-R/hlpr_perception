@@ -38,11 +38,14 @@ from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 from std_msgs.msg import Float64MultiArray
 
+
+
+
 class CVImageSubscriber:
     def __init__(self, display_on):
-        self._sub=rospy.Subscriber("/camera/color/image_rect_color", Image, self._cb)
+        self._sub=rospy.Subscriber("/camera/color/image_raw", Image, self._cb)
         self._bridge = CvBridge()
-        self._fgbg = cv2.createBackgroundSubtractorMOG2(history=20)
+        self._fgbg = cv2.createBackgroundSubtractorMOG2(history=5)
         self._motion_pub = rospy.Publisher("/features/opencv/motion",Float64MultiArray, queue_size=1)
 
         self._flow_ang_pub = rospy.Publisher("/features/opencv/flow/angle",Float64MultiArray, queue_size=1)
@@ -64,59 +67,97 @@ class CVImageSubscriber:
         except CvBridgeError as e:
             rospy.logerr(e)
             return
-        if self._disp:
-            cv2.imshow("frame0",cv_image)
         
         fgmask=self._fgbg.apply(cv_image)
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
         fgmask = cv2.morphologyEx(fgmask,cv2.MORPH_OPEN, kernel)
 
-        flow = []
+        move = []
+        mag = []
+        ang = []
         if len(self._prev)>0:
             hsv = numpy.zeros_like(cv2.cvtColor(cv2.cvtColor(cv_image,cv2.COLOR_GRAY2BGR),cv2.COLOR_BGR2HSV))
             hsv[...,1] = 255
-            flow = cv2.calcOpticalFlowFarneback(self._prev,cv_image, None, 
-                                                0.5, 3, 15, 3, 5, 1.2, 0)
-            mag, ang = cv2.cartToPolar(flow[...,0], flow[...,1])
-            total = [numpy.sum(flow[...,0]),
-                     numpy.sum(flow[...,1])]
+            #flow = cv2.calcOpticalFlowFarneback(self._prev,cv_image, None, 
+            #                                    0.5, 3, 15, 3, 5, 1.2, 0)
+
+            feats = cv2.goodFeaturesToTrack(self._prev, maxCorners=500, qualityLevel=0.001,minDistance=5)
+            new_points,status,err = cv2.calcOpticalFlowPyrLK(self._prev, cv_image, feats,numpy.zeros_like(feats))
+
+            move = new_points-feats
             
-            total_mag = math.sqrt(total[0]*total[0]+total[1]*total[1])
+            mag,ang = cv2.cartToPolar(move[...,0],move[...,1])
+            total = [numpy.sum(move[...,0]),
+                     numpy.sum(move[...,1])]
+
+            total_mag = math.sqrt(total[0]*total[0]+total[1]*total[1])/move.shape[0]
             total_ang = math.atan2(total[1],total[0])
 
             mag[numpy.isinf(mag)]=0
 
         if self._disp:
             cv2.imshow("frame",fgmask)#cv2.bitwise_and(cv_image,cv_image,mask=fgmask))
-            if len(flow)>0:
-                hsv[...,0] =  ang*180/numpy.pi/2
-                hsv[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)
-                bgr = cv2.cvtColor(hsv,cv2.COLOR_HSV2BGR)
-                cv2.imshow('frame2',bgr)
+            cv2.imshow("frame0",cv_image)
+            
+            if len(move)>0:
+                
+                flow_img = cv2.cvtColor(cv_image,cv2.COLOR_GRAY2BGR)
+                for i in range(len(feats)):
+                    if status[i]==0:
+                        continue
+                    x0 = feats[i][0,0]
+                    y0 = feats[i][0,1]
+                    x1 = new_points[i][0,0]
+                    y1 = new_points[i][0,1]
+                    cv2.line(flow_img, (x0,y0),(x1,y1),(0,255,0))
+
+                    x0 = flow_img.shape[1]/2
+                    y0 = flow_img.shape[1]/2
+                    x1 = int(x0+total_mag*4*math.cos(total_ang))
+                    y1 = int(y0+total_mag*4*math.sin(total_ang))
+                    cv2.line(flow_img, (x0,y0),(x1,y1),(255,0,0))
+                    
+                    
+                    #    hsv[...,0] =  ang*180/numpy.pi/2
+                #    hsv[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)
+                cv2.imshow('frame1',flow_img)
             cv2.waitKey(3)
 
         w = int(fgmask.shape[1]/self._splits)
         
         data_movement = []
-        data_flow_mag = []
-        data_flow_ang = []
+        splits = []
 
         for i in range(self._splits):
             start = i*w
-            end = min(i*w, fgmask.shape[1])
             data_movement.append(numpy.average(fgmask[:,w*i:w*(i+1)]))
-            if len(flow)>0:
-                data_flow_mag.append(numpy.average(mag[:,w*i:w*(i+1)]))
+            splits.append(start)
+        
+        
+        data_flow_mags = [[0] for i in range(self._splits)]
+        data_flow_angs = [[0] for i in range(self._splits)]
+        if len(move)>0:
+            for i in range(len(move)):
+                prop = feats[i][0,0]/float(fgmask.shape[1])
+                idx =  int(math.floor(prop*self._splits))#, move[i]
+
                 try:
-                    data_flow_ang.append(numpy.average(ang[:,w*i:w*(i+1)],weights = mag[:,w*i:w*(i+1)]*mag[:,w*i:w*(i+1)]>10))
-                except ZeroDivisionError:
-                    data_flow_ang.append(0)
+                    data_flow_mags[idx] = numpy.append(data_flow_mags[idx],mag[i])
+                    data_flow_angs[idx] = numpy.append(data_flow_angs[idx],ang[i])
+                except IndexError:
+                    print prop, idx, new_points[i][0,0], flow_img.shape[1]
+                    
+        #print map(lambda a: numpy.average(a,0),data_flow_split)
+        #print map(lambda a: numpy.average(a,0, weights=1*(a[...,1]>10)),data_flow_split)
+        data_flow_ang = [numpy.average(a) for a in data_flow_mags]
+        data_flow_mag = [numpy.average(a) for a in data_flow_angs]
+            
         self._prev = cv_image    
         
 
         self._motion_pub.publish(Float64MultiArray(data=data_movement))
 
-        if len(flow)>0:
+        if len(move)>0:
             self._flow_ang_pub.publish(Float64MultiArray(data=data_flow_ang))
             self._mag_pub.publish(Float64MultiArray(data=data_flow_mag))
             self._acc_pub.publish(Float64MultiArray(data=[data_flow_mag[i]-self._prev_mag[i] for i in range(len(data_flow_mag))]))

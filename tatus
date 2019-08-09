@@ -1,0 +1,72 @@
+[1mdiff --git a/hlpr_visual_features/src/hlpr_visual_features/open_cv_features.py b/hlpr_visual_features/src/hlpr_visual_features/open_cv_features.py[m
+[1mindex aa83e22..8ffd299 100755[m
+[1m--- a/hlpr_visual_features/src/hlpr_visual_features/open_cv_features.py[m
+[1m+++ b/hlpr_visual_features/src/hlpr_visual_features/open_cv_features.py[m
+[36m@@ -36,21 +36,20 @@[m [mimport math[m
+ import argparse[m
+ from cv_bridge import CvBridge, CvBridgeError[m
+ from sensor_msgs.msg import Image[m
+[31m-from contingency.msg import ArrayFeature[m
+[31m-[m
+[32m+[m[32mfrom std_msgs.msg import Float64MultiArray[m
+ [m
+ class CVImageSubscriber:[m
+     def __init__(self, display_on):[m
+[31m-        self._sub=rospy.Subscriber("/camera/rgb/image_rect_color", Image, self._cb)[m
+[32m+[m[32m        self._sub=rospy.Subscriber("/camera/color/image_rect_color", Image, self._cb)[m
+         self._bridge = CvBridge()[m
+         self._fgbg = cv2.createBackgroundSubtractorMOG2(history=20)[m
+[31m-        self._motion_pub = rospy.Publisher("/contingency/opencv/motion",ArrayFeature, queue_size=1)[m
+[32m+[m[32m        self._motion_pub = rospy.Publisher("/features/opencv/motion",Float64MultiArray, queue_size=1)[m
+ [m
+[31m-        self._flow_ang_pub = rospy.Publisher("/contingency/opencv/flow/angle",ArrayFeature, queue_size=1)[m
+[31m-        self._mag_pub = rospy.Publisher("/contingency/opencv/flow/magnitude",ArrayFeature, queue_size=1)[m
+[31m-        self._acc_pub = rospy.Publisher("/contingency/opencv/flow/acceleration",ArrayFeature, queue_size=1)[m
+[31m-        self._mag_total_pub = rospy.Publisher("/contingency/opencv/flow/total/magnitude",ArrayFeature, queue_size=1)[m
+[31m-        self._ang_total_pub = rospy.Publisher("/contingency/opencv/flow/total/angle",ArrayFeature, queue_size=1)[m
+[32m+[m[32m        self._flow_ang_pub = rospy.Publisher("/features/opencv/flow/angle",Float64MultiArray, queue_size=1)[m
+[32m+[m[32m        self._mag_pub = rospy.Publisher("/features/opencv/flow/magnitude",Float64MultiArray, queue_size=1)[m
+[32m+[m[32m        self._acc_pub = rospy.Publisher("/features/opencv/flow/acceleration",Float64MultiArray, queue_size=1)[m
+[32m+[m[32m        self._mag_total_pub = rospy.Publisher("/features/opencv/flow/total/magnitude",Float64MultiArray, queue_size=1)[m
+[32m+[m[32m        self._ang_total_pub = rospy.Publisher("/features/opencv/flow/total/angle",Float64MultiArray, queue_size=1)[m
+ [m
+ [m
+         self._splits = 4[m
+[36m@@ -65,6 +64,8 @@[m [mclass CVImageSubscriber:[m
+         except CvBridgeError as e:[m
+             rospy.logerr(e)[m
+             return[m
+[32m+[m[32m        if self._disp:[m
+[32m+[m[32m            cv2.imshow("frame0",cv_image)[m
+         [m
+         fgmask=self._fgbg.apply(cv_image)[m
+         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))[m
+[36m@@ -87,7 +88,6 @@[m [mclass CVImageSubscriber:[m
+ [m
+         if self._disp:[m
+             cv2.imshow("frame",fgmask)#cv2.bitwise_and(cv_image,cv_image,mask=fgmask))[m
+[31m-            cv2.imshow("frame0",cv_image)[m
+             if len(flow)>0:[m
+                 hsv[...,0] =  ang*180/numpy.pi/2[m
+                 hsv[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)[m
+[36m@@ -114,14 +114,14 @@[m [mclass CVImageSubscriber:[m
+         self._prev = cv_image    [m
+         [m
+ [m
+[31m-        self._motion_pub.publish(ArrayFeature(data=data_movement))[m
+[32m+[m[32m        self._motion_pub.publish(Float64MultiArray(data=data_movement))[m
+ [m
+         if len(flow)>0:[m
+[31m-            self._flow_ang_pub.publish(ArrayFeature(data=data_flow_ang))[m
+[31m-            self._mag_pub.publish(ArrayFeature(data=data_flow_mag))[m
+[31m-            self._acc_pub.publish(ArrayFeature(data=[data_flow_mag[i]-self._prev_mag[i] for i in range(len(data_flow_mag))]))[m
+[31m-            self._mag_total_pub.publish(ArrayFeature(data=[total_mag]))[m
+[31m-            self._ang_total_pub.publish(ArrayFeature(data=[total_ang]))[m
+[32m+[m[32m            self._flow_ang_pub.publish(Float64MultiArray(data=data_flow_ang))[m
+[32m+[m[32m            self._mag_pub.publish(Float64MultiArray(data=data_flow_mag))[m
+[32m+[m[32m            self._acc_pub.publish(Float64MultiArray(data=[data_flow_mag[i]-self._prev_mag[i] for i in range(len(data_flow_mag))]))[m
+[32m+[m[32m            self._mag_total_pub.publish(Float64MultiArray(data=[total_mag]))[m
+[32m+[m[32m            self._ang_total_pub.publish(Float64MultiArray(data=[total_ang]))[m
+             self._prev_mag = data_flow_mag[m
+ [m
+ if __name__=="__main__":[m
