@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(hlpr_feature_extraction)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--as-needed -pthread")
 
 set(OPENNI_INCLUDE_DIRS /usr/include/ni)
@@ -39,7 +39,7 @@ catkin_package(
 
 include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
-add_definitions(${PCL_DEFINITIONS})
+#add_definitions(${PCL_DEFINITIONS})
 include_directories(${FREENECT2_INCLUDE_DIRS})
 include_directories(${freenect2_INCLUDE_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS})
